@@ -44,7 +44,7 @@ def test_cli_cross_dataset(walch_root, bidsleep_root, tmp_path, capsys):
     assert report["setup"]["folds"][0]["n_test"] == 8
     gbdt = next(r for r in report["results"] if r["model"] == "gbdt_motion_hr")
     assert gbdt["pooled"]["kappa"] > 0.3
-    assert len(gbdt["nights"]) == 8
+    assert len(gbdt["per_seed"][0]["nights"]) == 8
 
 
 def test_hr_only_cross_dataset_without_motion_files(walch_root, bidsleep_root, tmp_path):

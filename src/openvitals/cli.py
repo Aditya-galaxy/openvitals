@@ -7,6 +7,8 @@
     openvitals export walch=data/walch --model tcn_motion_hr --scheme 4class --out tcn.onnx
     openvitals featurize bidsleep --data-dir data --features feat --download --evict
     openvitals bench bidsleep=features:feat --split kfold
+    openvitals bench walch=data/walch --models tcn_hr,gbdt_hr --seeds 0,1,2 --reference gbdt_hr
+    openvitals merge results/a/kfold-4class-*.json --out results/merged
 """
 
 from __future__ import annotations
@@ -46,6 +48,17 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--models", default=",".join(DEFAULT_MODELS))
     b.add_argument("--out", type=Path, default=Path("results"))
     b.add_argument("--cache", type=Path, default=Path(".cache"))
+    b.add_argument("--seeds", default="0", help="comma-separated training seeds, e.g. 0,1,2")
+    b.add_argument("--reference", help="model for paired comparisons (default: best pooled kappa)")
+    b.add_argument("--bootstrap", type=int, default=benchmark.N_BOOT, help="subject bootstrap draws")
+    b.add_argument("--tag", help="suffix for the report file name, e.g. seed1")
+
+    g = sub.add_parser("merge", help="merge reports of one split/scheme (e.g. one per seed)")
+    g.add_argument("reports", nargs="+", type=Path)
+    g.add_argument("--out", type=Path, required=True)
+    g.add_argument("--reference")
+    g.add_argument("--bootstrap", type=int, default=benchmark.N_BOOT)
+    g.add_argument("--tag")
 
     e = sub.add_parser("export", help="train a sequence model on all given nights and write ONNX")
     e.add_argument("data", nargs="+", metavar="NAME=PATH")
@@ -64,6 +77,14 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--workers", type=int, default=8)
 
     a = p.parse_args(argv)
+    if a.cmd == "merge":
+        import json
+
+        merged = benchmark.merge([json.loads(r.read_text()) for r in a.reports], a.reference, a.bootstrap)
+        jpath, mpath = benchmark.write(merged, a.out, a.tag)
+        print(mpath.read_text())
+        print(f"wrote {jpath} and {mpath}", file=sys.stderr)
+        return 0
     if a.cmd == "featurize":
         subjects = [s for s in (a.subjects or "").split(",") if s] or None
         featstore.featurize(a.dataset, a.data_dir, a.features, a.download, a.evict, subjects, a.workers,
@@ -97,8 +118,10 @@ def main(argv: list[str] | None = None) -> int:
         "k": a.k, "seed": a.seed,
         "description": _describe(train) + (f"; test: {_describe(folds[0].test)}" if a.split == "cross" else ""),
     }
-    report = benchmark.run([m.strip() for m in a.models.split(",") if m.strip()], folds, a.scheme, setup)
-    jpath, mpath = benchmark.write(report, a.out)
+    seeds = [int(x) for x in a.seeds.split(",") if x.strip()]
+    report = benchmark.run([m.strip() for m in a.models.split(",") if m.strip()], folds, a.scheme, setup,
+                           seeds=seeds, reference=a.reference, n_boot=a.bootstrap)
+    jpath, mpath = benchmark.write(report, a.out, a.tag)
     print(mpath.read_text())
     print(f"wrote {jpath} and {mpath}", file=sys.stderr)
     return 0

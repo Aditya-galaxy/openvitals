@@ -8,7 +8,7 @@ sensor data, but each one reinvents sleep staging and recovery scoring with no
 published accuracy. OpenVitals is a shared, device-agnostic library with
 numbers attached.
 
-**Status:** v0.1 – benchmark harness and baselines; see [RESULTS.md](RESULTS.md). Not a medical device; for
+**Status:** v0.3 – baselines, whole-night sequence models, 5-seed results with subject-bootstrap CIs; see [RESULTS.md](RESULTS.md). Not a medical device; for
 wellness and research use only.
 
 ## Benchmark rules
@@ -19,6 +19,9 @@ wellness and research use only.
 - **Night-level agreement.** TST, WASO, sleep efficiency and onset latency as
   Bland–Altman bias with 95% limits of agreement.
 - **Cross-dataset results are the headline.** Train on one cohort, test on another.
+- **Uncertainty is reported, and subjects are the unit.** 95% CIs resample test subjects, not
+  epochs or nights. Seed SD shows training instability. Model differences use a paired subject
+  bootstrap against a reference model.
 
 ## Datasets
 
@@ -43,6 +46,19 @@ uv run openvitals bench bidsleep=data/bidsleep --test walch=data/walch --split c
 ```
 
 Reports go to `results/<split>-<scheme>.{md,json}`; parsed nights are cached in `.cache/`.
+
+### Seeds, confidence intervals and merging
+
+```bash
+# 5 training seeds, paired comparison against gbdt_hr
+uv run openvitals bench walch=data/walch --models gbdt_hr,tcn_hr --seeds 0,1,2,3,4 --reference gbdt_hr
+# or one process per seed, merged afterwards (identical result)
+uv run openvitals bench walch=data/walch --models gbdt_hr,tcn_hr --seeds 3 --tag s3
+uv run openvitals merge results/kfold-4class-s*.json --reference gbdt_hr --out results/merged
+```
+
+Each JSON report keeps one confusion matrix per test subject per seed, so merging is exact,
+and comparisons against a different reference can be recomputed without retraining.
 
 ### Sequence models and ONNX
 

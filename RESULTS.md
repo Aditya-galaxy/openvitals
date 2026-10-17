@@ -6,12 +6,89 @@ v0.1 below: Walch has motion + HR; BIDSleep is **HR only** locally, so every BID
 number here is HR-only. [`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)
 fills in motion on Colab.
 
+## v0.3: five seeds and subject-bootstrap confidence intervals (2026-10-17)
+
+Every 4-class number below pools **5 training seeds** (0–4) on fixed folds. Brackets are **95% CIs
+from resampling test subjects** (2,000 draws). Subjects are the independent unit, not epochs or
+nights. "Seed SD" is the spread of pooled kappa across seeds. **Δ** is a *paired* subject bootstrap:
+both models are scored on the same resampled subjects, which removes between-subject variance, so it
+can resolve gains far smaller than the width of each model's own CI. Merged reports are in
+`results/v03/`, and per-seed raw reports in `results/v03/parts/`.
+
+### 4-class kappa [95% CI], 5 seeds
+
+| model | Walch 5-fold | Walch LOSO | BIDSleep 5-fold (HR) | BIDSleep → Walch (HR) | Walch → BIDSleep (HR) |
+|---|---|---|---|---|---|
+| gbdt_hr | 0.310 [0.271, 0.348] | 0.326 [0.286, 0.365] | 0.364 [0.341, 0.385] | 0.313 [0.279, 0.346] | 0.301 [0.280, 0.320] |
+| gbdt_motion_hr | 0.370 [0.329, 0.410] | 0.374 [0.334, 0.413] | – | – | – |
+| tcn_hr | **0.479** [0.432, 0.522] | 0.488 [0.442, 0.530] | 0.513 [0.483, 0.540] | 0.482 [0.440, 0.523] | **0.434** [0.409, 0.458] |
+| tcn_motion_hr | 0.472 [0.427, 0.513] | **0.498** [0.459, 0.535] | – | – | – |
+| gru_hr | 0.424 [0.375, 0.470] | – | **0.528** [0.498, 0.554] | **0.488** [0.449, 0.526] | 0.404 [0.375, 0.430] |
+| gru_motion_hr | 0.444 [0.393, 0.488] | – | – | – | – |
+
+Seed SD is 0.001–0.004 for gbdt and 0.004–0.016 for the sequence models. GRU wasn't run on Walch LOSO
+(~65 min per seed). BIDSleep is HR-only locally.
+
+### Paired differences (Δ kappa [95% CI], P(Δ ≤ 0))
+
+| question | split | Δ kappa | P(Δ ≤ 0) | verdict |
+|---|---|---|---|---|
+| sequence model vs best baseline | Walch LOSO: tcn_hr − gbdt_motion_hr | +0.114 [+0.072, +0.157] | 0.000 | real |
+| | BIDSleep→Walch: gru_hr − gbdt_hr | +0.175 [+0.149, +0.202] | 0.000 | real |
+| | Walch→BIDSleep: tcn_hr − gbdt_hr | +0.133 [+0.120, +0.147] | 0.000 | real |
+| does motion help a sequence model? | Walch LOSO: tcn_motion_hr − tcn_hr | +0.010 [−0.013, +0.033] | 0.189 | **not resolved** |
+| | Walch 5-fold: tcn_motion_hr − tcn_hr | −0.007 [−0.029, +0.015] | 0.751 | not resolved |
+| TCN vs GRU | Walch 5-fold: gru_hr − tcn_hr | −0.054 [−0.079, −0.030] | 1.000 | TCN better |
+| | Walch→BIDSleep: gru_hr − tcn_hr | −0.031 [−0.040, −0.021] | 1.000 | TCN better |
+| | BIDSleep 5-fold: tcn_hr − gru_hr | −0.015 [−0.021, −0.009] | 1.000 | **GRU better** |
+| | BIDSleep→Walch: tcn_hr − gru_hr | −0.006 [−0.021, +0.009] | 0.767 | not resolved |
+| does motion help a baseline? | Walch LOSO: gbdt_hr − gbdt_motion_hr | −0.048 [−0.074, −0.017] | 0.999 | motion helps gbdt |
+
+### What changed from v0.2
+
+1. **The v0.2 headline was the luckiest seed.** Walch LOSO tcn_hr seeds score 0.511, 0.497, 0.478,
+   0.479 and 0.475. v0.2 reported seed 0 (0.511), and the 5-seed estimate is 0.488. Single-seed numbers
+   overstated the best model by about 0.02.
+2. **Sequence models beat the baselines, clearly.** Δ is +0.11 to +0.18 kappa in every split, with CIs
+   far from zero. This is the one big, solid result.
+3. **Motion adds no measurable kappa once the model sees the whole night.** Paired Δ is +0.010
+   [−0.013, +0.033] on LOSO, so any true effect is below ~0.03. For gbdt, which has no night context,
+   motion does help (+0.048). Motion may still help with wake specifically: tcn_motion_hr's wake
+   sensitivity is 69% [62%, 77%] against tcn_hr's 59% [52%, 66%], and it's steadier across seeds
+   (SD 0.007 vs 0.015). Those intervals touch, so treat it as a lead, not a result.
+4. **"TCN vs GRU" depends on training-set size, and now that's resolvable.** On 31 Walch nights the TCN
+   wins (by 0.03–0.05). On 253 BIDSleep nights the GRU wins by a small but resolved +0.015
+   [+0.009, +0.021], a gap far narrower than either model's CI (about ±0.03).
+5. **Cross-dataset still trails within-dataset.** BIDSleep→Walch 0.488 vs Walch LOSO 0.488–0.498 is
+   about equal. Walch→BIDSleep 0.434 vs BIDSleep 5-fold 0.528 is a real gap: training on 31 nights
+   doesn't transfer as well as training on 253.
+
+### Against the v1 targets (5-seed estimates)
+
+| target | v1 goal | v0.3 best | status |
+|---|---|---|---|
+| 4-stage kappa, cross-dataset | ≥ 0.55 | 0.488 [0.449, 0.526] (gru_hr, BIDSleep→Walch) | **not met**: the CI excludes 0.55 |
+| 4-class accuracy | ≥ 70% | 66.7% [64.5%, 68.5%] (gru_hr, BIDSleep 5-fold) | not met: the CI excludes 70% |
+| wake / deep sensitivity | ≥ 60% each | wake 69% [62, 77], deep 73% [67, 79] (tcn_motion_hr, Walch LOSO) | **met** |
+| TST bias | within ±20 min | −9.6 min (tcn_hr, Walch LOSO); −5.5 (gru_hr, BIDSleep) | met, but limits of agreement are about ±50–60 min |
+
+### Next steps
+
+1. **BIDSleep motion on Colab** ([`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)), then
+   test the wake-sensitivity lead from point 3 on 253 nights, where the CIs are about half as wide.
+2. **Pool both datasets for training.** The GRU benefits from more data, and cross-dataset is the
+   target that's still missed.
+3. **Night-level agreement.** TST limits of agreement of about ±55 min are the weakest number here.
+   Consider a night-level calibration head, or report TST from an ensemble of seeds.
+
+---
+
 ## v0.2: whole-night sequence models (2026-10-17)
 
 `tcn_*` is a dilated residual TCN (receptive field ±126 epochs, about ±1 h) and `gru_*` is one
 bidirectional GRU layer. Both are about 10–30k parameters, use the same per-epoch features as the
 baselines, are early-stopped on held-out *training* subjects, and export to ONNX. Each number is a
-**single seed**, with no confidence intervals yet.
+**single seed** (seed 0) with no CIs, so it's superseded by the 5-seed estimates in v0.3 above.
 
 ### 4-class kappa (wake / light / deep / REM)
 
