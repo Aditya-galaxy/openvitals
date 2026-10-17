@@ -47,3 +47,26 @@ def test_bidsleep_rec_start_parsing():
     assert dt.utcoffset().total_seconds() == -4 * 3600  # EDT
     dt = bidsleep.parse_rec_start(np.array(739434.5))  # MATLAB datenum
     assert (dt.year, dt.hour) == (2024, 12)
+
+
+def test_compact_load_keeps_features(walch_root, tmp_path):
+    from openvitals import features
+
+    full = datasets.load("walch", walch_root, cache_dir=tmp_path)
+    small = datasets.load("walch", walch_root, cache_dir=tmp_path, compact=True)
+    assert [n.key for n in full] == [n.key for n in small]
+    assert all(len(n.motion) == 0 for n in small)
+    for inputs in features.INPUTS:
+        a, b = features.extract(full[0], inputs), features.extract(small[0], inputs)
+        np.testing.assert_allclose(a.X, b.X)
+        assert (a.scorable == b.scorable).all()
+
+
+def test_compact_feature_cache(walch_root, tmp_path):
+    from openvitals import features
+
+    first = datasets.load("walch", walch_root, cache_dir=tmp_path, compact=True)
+    assert len(list(tmp_path.glob("features-walch-*.pkl"))) == 8
+    second = datasets.load("walch", walch_root, cache_dir=tmp_path, compact=True)
+    np.testing.assert_allclose(features.extract(first[0], "motion+hr").X, features.extract(second[0], "motion+hr").X)
+    assert second[0].meta["compacted"]

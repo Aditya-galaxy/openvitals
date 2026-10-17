@@ -20,6 +20,8 @@ MOTION_FEATURES = [
 HR_FEATURES = ["hr_z", "hr_z_w5", "hr_std_w5", "hr_std_w11", "hr_diff"]
 TIME_FEATURES = ["hours_since_start"]
 INPUTS = ("motion", "hr", "motion+hr")
+# Bump whenever feature definitions change; it invalidates on-disk feature caches.
+FEATURE_VERSION = 1
 
 
 @dataclass
@@ -41,8 +43,21 @@ def extract(night: Night, inputs: str = "motion+hr") -> EpochFeatures:
         raise ValueError(f"inputs must be one of {INPUTS}")
     cache = night.__dict__.setdefault("_feature_cache", {})
     if inputs not in cache:
+        if night.meta.get("compacted"):
+            raise RuntimeError(f"{night.key} was compacted; raw signals are gone")
         cache[inputs] = _extract(night, inputs)
     return cache[inputs]
+
+
+def compact(night: Night) -> Night:
+    """Compute every feature set, then release the raw signals. Models only
+    read features, so a compacted night behaves the same everywhere."""
+    for inputs in INPUTS:
+        extract(night, inputs)
+    night.motion = np.empty((0, 4))
+    night.hr = np.empty((0, 2))
+    night.meta["compacted"] = True
+    return night
 
 
 def _extract(night: Night, inputs: str) -> EpochFeatures:

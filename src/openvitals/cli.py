@@ -4,6 +4,9 @@
     openvitals info walch=data/walch
     openvitals bench walch=data/walch --scheme 4class --split kfold
     openvitals bench bidsleep=data/bidsleep --test walch=data/walch --split cross
+    openvitals export walch=data/walch --model tcn_motion_hr --scheme 4class --out tcn.onnx
+    openvitals featurize bidsleep --data-dir data --features feat --download --evict
+    openvitals bench bidsleep=features:feat --split kfold
 """
 
 from __future__ import annotations
@@ -14,9 +17,9 @@ from pathlib import Path
 
 import numpy as np
 
-from . import benchmark, datasets, models, splits, stages
+from . import benchmark, datasets, featstore, models, splits, stages
 
-DEFAULT_MODELS = list(models.REGISTRY)
+DEFAULT_MODELS = list(models.BASELINES)  # sequence models need the seq extra; pass --models
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -34,7 +37,7 @@ def main(argv: list[str] | None = None) -> int:
     i.add_argument("--cache", type=Path, default=Path(".cache"))
 
     b = sub.add_parser("bench", help="run the benchmark")
-    b.add_argument("data", nargs="+", metavar="NAME=PATH", help="training data (pooled if several)")
+    b.add_argument("data", nargs="+", metavar="NAME=PATH", help="training data (pooled if several); PATH may be features:<dir>")
     b.add_argument("--test", nargs="*", default=[], metavar="NAME=PATH", help="held-out data for --split cross")
     b.add_argument("--scheme", choices=sorted(stages.SCHEMES), default="4class")
     b.add_argument("--split", choices=["kfold", "loso", "cross"], default="kfold")
@@ -44,7 +47,32 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--out", type=Path, default=Path("results"))
     b.add_argument("--cache", type=Path, default=Path(".cache"))
 
+    e = sub.add_parser("export", help="train a sequence model on all given nights and write ONNX")
+    e.add_argument("data", nargs="+", metavar="NAME=PATH")
+    e.add_argument("--model", choices=sorted(models.SEQUENCE), default="tcn_motion_hr")
+    e.add_argument("--scheme", choices=sorted(stages.SCHEMES), default="4class")
+    e.add_argument("--out", type=Path, required=True)
+    e.add_argument("--cache", type=Path, default=Path(".cache"))
+
+    f = sub.add_parser("featurize", help="write per-subject feature files, optionally streaming raw data")
+    f.add_argument("dataset", choices=sorted(datasets.REGISTRY))
+    f.add_argument("--data-dir", type=Path, default=Path("data"), help="parent of <dataset>/ raw data")
+    f.add_argument("--features", type=Path, required=True, help="feature store root")
+    f.add_argument("--download", action="store_true", help="fetch each subject's raw files just before use")
+    f.add_argument("--evict", action="store_true", help="delete each subject's raw files after featurizing")
+    f.add_argument("--subjects", help="comma-separated subset")
+    f.add_argument("--workers", type=int, default=8)
+
     a = p.parse_args(argv)
+    if a.cmd == "featurize":
+        subjects = [s for s in (a.subjects or "").split(",") if s] or None
+        featstore.featurize(a.dataset, a.data_dir, a.features, a.download, a.evict, subjects, a.workers,
+                            log=lambda m: print(m, flush=True))
+        return 0
+    if a.cmd == "export":
+        model = models.make(a.model).fit(_load_all(a.data, a.cache), a.scheme)
+        print(model.export_onnx(a.out))
+        return 0
     if a.cmd == "download":
         from .download import download
 
@@ -82,7 +110,10 @@ def _load_all(specs: list[str], cache: Path):
         name, sep, path = spec.partition("=")
         if not sep:
             raise SystemExit(f"expected NAME=PATH, got {spec!r}")
-        nights += datasets.load(name, Path(path), cache_dir=cache)
+        if path.startswith("features:"):
+            nights += featstore.load_dataset(Path(path[len("features:"):]), name)
+        else:
+            nights += datasets.load(name, Path(path), cache_dir=cache, compact=True)
     return nights
 
 

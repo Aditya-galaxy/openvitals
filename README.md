@@ -44,6 +44,29 @@ uv run openvitals bench bidsleep=data/bidsleep --test walch=data/walch --split c
 
 Reports go to `results/<split>-<scheme>.{md,json}`; parsed nights are cached in `.cache/`.
 
+### Sequence models and ONNX
+
+```bash
+uv sync --extra seq                                   # torch, onnx, onnxruntime
+uv run openvitals bench walch=data/walch --models tcn_motion_hr,gru_motion_hr --split loso
+uv run openvitals export walch=data/walch --model tcn_motion_hr --scheme 4class --out tcn.onnx
+```
+
+The ONNX graph takes raw `features.extract` output, shape `(1, epochs, n_features)`,
+with standardisation inside. Feature order and class names are in the model metadata.
+
+### Large datasets: stream into a feature store
+
+```bash
+uv run openvitals featurize bidsleep --data-dir data --features feat --download --evict
+uv run openvitals bench bidsleep=features:feat --test walch=features:feat --split cross
+```
+
+This handles one subject at a time (download, verify, featurize, delete raw) and
+resumes after interruption. [`notebooks/colab_bidsleep.ipynb`](notebooks/colab_bidsleep.ipynb)
+runs this on Colab with the feature store on Google Drive. Use it for full BIDSleep
+when PhysioNet is slow from your network.
+
 Schemes: `2class` (wake/sleep), `3class` (wake/NREM/REM), `4class` (wake/light/deep/REM).
 
 ## Baselines
@@ -70,8 +93,10 @@ src/openvitals/
   models/        baselines
   splits.py      subject k-fold, LOSO, cross-dataset
   metrics.py     kappa, per-class, sleep summary, Bland–Altman
+  models/sequence.py  whole-night TCN / bi-GRU + ONNX export
   benchmark.py   run + markdown/json report
   download.py    PhysioNet fetch with checksum verification
+  featstore.py   per-subject feature files; streaming featurize
 ```
 
 ## Tests

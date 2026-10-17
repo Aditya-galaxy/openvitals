@@ -38,6 +38,15 @@ def night_dirs(root: Path) -> list[Path]:
     return sorted(out, key=lambda p: (p.parent.name, _int_or_str(p.name)))
 
 
+def manifest_subject(rel: str) -> str | None:
+    head = rel.split("/")[0]
+    return head if head.startswith("Bidslab") and "/" in rel else None
+
+
+def subject_ids(root: Path) -> list[str]:
+    return sorted({d.parent.name for d in night_dirs(root)})
+
+
 def load(
     root: Path,
     cache_dir: Path | None = None,

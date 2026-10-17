@@ -29,6 +29,12 @@ LICENSE = "ODC-By 1.0"
 _STAGE_MAP = {0: stages.WAKE, 1: stages.N1, 2: stages.N2, 3: stages.N3, 4: stages.N3, 5: stages.REM}
 
 
+def manifest_subject(rel: str) -> str | None:
+    """Subject a dataset file belongs to, or None. Steps are not used."""
+    folder, _, fname = rel.partition("/")
+    return fname.split("_")[0] if folder in ("motion", "heart_rate", "labels") and fname else None
+
+
 def subject_ids(root: Path) -> list[str]:
     return sorted(p.name.split("_")[0] for p in (Path(root) / "labels").glob("*_labeled_sleep.txt"))
 
