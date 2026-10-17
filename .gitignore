@@ -6,3 +6,4 @@ data/
 .pytest_cache/
 logs/
 feat/
+notebooks/*.bundled.ipynb
