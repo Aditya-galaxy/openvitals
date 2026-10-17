@@ -63,7 +63,7 @@ uv run openvitals bench bidsleep=features:feat --test walch=features:feat --spli
 ```
 
 This handles one subject at a time (download, verify, featurize, delete raw) and
-resumes after interruption. [`notebooks/colab_bidsleep.ipynb`](notebooks/colab_bidsleep.ipynb)
+resumes after interruption. [`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)
 runs this on Colab with the feature store on Google Drive. Use it for full BIDSleep
 when PhysioNet is slow from your network.
 

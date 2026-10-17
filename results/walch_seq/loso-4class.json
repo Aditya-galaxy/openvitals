@@ -1,0 +1,2321 @@
+{
+  "openvitals_version": "0.1.0",
+  "python": "3.11.15",
+  "setup": {
+    "split": "loso",
+    "k": 5,
+    "seed": 0,
+    "description": "walch (31 subjects, 31 nights)",
+    "scheme": "4class",
+    "classes": [
+      "wake",
+      "light",
+      "deep",
+      "rem"
+    ],
+    "folds": [
+      {
+        "name": "loso:walch/1066528",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/1360686",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/1449548",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/1455390",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/1818471",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/2598705",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/2638030",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/3509524",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/3997827",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/4018081",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/4314139",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/4426783",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/46343",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/5132496",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/5383425",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/5498603",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/5797046",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/6220552",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/759667",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/7749105",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/781756",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/8000685",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/8173033",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/8258170",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/844359",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/8530312",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/8686948",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/8692923",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/9106476",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/9618981",
+        "n_train": 30,
+        "n_test": 1
+      },
+      {
+        "name": "loso:walch/9961348",
+        "n_train": 30,
+        "n_test": 1
+      }
+    ]
+  },
+  "skipped_models": [],
+  "results": [
+    {
+      "model": "tcn_hr",
+      "scheme": "4class",
+      "pooled": {
+        "n_epochs": 25962,
+        "accuracy": 0.6757953932670827,
+        "kappa": 0.5111826721808231,
+        "macro_f1": 0.6456412329446025,
+        "per_class": {
+          "wake": {
+            "support": 2244,
+            "sensitivity": 0.60650623885918,
+            "precision": 0.48382509776039817,
+            "f1": 0.5382637927625075
+          },
+          "light": {
+            "support": 14460,
+            "sensitivity": 0.6280774550484094,
+            "precision": 0.8035745885683949,
+            "f1": 0.7050694821830603
+          },
+          "deep": {
+            "support": 3577,
+            "sensitivity": 0.7632093933463796,
+            "precision": 0.5710102489019033,
+            "f1": 0.6532663316582914
+          },
+          "rem": {
+            "support": 5681,
+            "sensitivity": 0.7695828199260694,
+            "precision": 0.6187376167562978,
+            "f1": 0.6859653251745509
+          }
+        },
+        "confusion": [
+          [
+            1361,
+            496,
+            48,
+            339
+          ],
+          [
+            1143,
+            9082,
+            1930,
+            2305
+          ],
+          [
+            74,
+            723,
+            2730,
+            50
+          ],
+          [
+            235,
+            1001,
+            73,
+            4372
+          ]
+        ]
+      },
+      "per_subject": {
+        "n_subjects": 31,
+        "kappa_mean": 0.5005166700376162,
+        "kappa_sd": 0.12445096168665087,
+        "accuracy_mean": 0.6711179169038103,
+        "accuracy_sd": 0.08634231531098016
+      },
+      "night_agreement": {
+        "tst_min": {
+          "n": 31,
+          "bias": -9.17741935483871,
+          "loa_low": -53.04052934563298,
+          "loa_high": 34.68569063595556,
+          "mae": 17.43548387096774
+        },
+        "waso_min": {
+          "n": 31,
+          "bias": 9.709677419354838,
+          "loa_low": -30.823936232760182,
+          "loa_high": 50.24329107146986,
+          "mae": 17.129032258064516
+        },
+        "se": {
+          "n": 31,
+          "bias": -0.01933311224787483,
+          "loa_low": -0.1220144271697499,
+          "loa_high": 0.08334820267400024,
+          "mae": 0.04266497785140809
+        },
+        "sol_min": {
+          "n": 31,
+          "bias": 2.2419354838709675,
+          "loa_low": -16.21551915722072,
+          "loa_high": 20.699390124962655,
+          "mae": 7.790322580645161
+        }
+      },
+      "nights": [
+        {
+          "night": "walch/1066528/1",
+          "fold": "loso:walch/1066528",
+          "n_epochs": 885,
+          "kappa": 0.5467201654798183,
+          "true_tst_min": 366.5,
+          "true_waso_min": 46.0,
+          "true_se": 0.8282485875706215,
+          "true_sol_min": 25.0,
+          "pred_tst_min": 401.5,
+          "pred_waso_min": 30.0,
+          "pred_se": 0.9073446327683616,
+          "pred_sol_min": 10.0
+        },
+        {
+          "night": "walch/1360686/1",
+          "fold": "loso:walch/1360686",
+          "n_epochs": 948,
+          "kappa": 0.5469220195126356,
+          "true_tst_min": 415.5,
+          "true_waso_min": 22.5,
+          "true_se": 0.8765822784810127,
+          "true_sol_min": 36.0,
+          "pred_tst_min": 425.0,
+          "pred_waso_min": 33.0,
+          "pred_se": 0.8966244725738397,
+          "pred_sol_min": 15.0
+        },
+        {
+          "night": "walch/1449548/1",
+          "fold": "loso:walch/1449548",
+          "n_epochs": 953,
+          "kappa": 0.5672151992799994,
+          "true_tst_min": 424.0,
+          "true_waso_min": 20.0,
+          "true_se": 0.8898216159496327,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 433.5,
+          "pred_waso_min": 24.5,
+          "pred_se": 0.9097586568730325,
+          "pred_sol_min": 18.5
+        },
+        {
+          "night": "walch/1455390/1",
+          "fold": "loso:walch/1455390",
+          "n_epochs": 955,
+          "kappa": 0.21567974606979745,
+          "true_tst_min": 435.5,
+          "true_waso_min": 34.5,
+          "true_se": 0.912041884816754,
+          "true_sol_min": 6.0,
+          "pred_tst_min": 460.0,
+          "pred_waso_min": 15.0,
+          "pred_se": 0.9633507853403142,
+          "pred_sol_min": 2.0
+        },
+        {
+          "night": "walch/1818471/1",
+          "fold": "loso:walch/1818471",
+          "n_epochs": 958,
+          "kappa": 0.6499146115549381,
+          "true_tst_min": 474.0,
+          "true_waso_min": 2.5,
+          "true_se": 0.9895615866388309,
+          "true_sol_min": 2.5,
+          "pred_tst_min": 469.5,
+          "pred_waso_min": 6.0,
+          "pred_se": 0.9801670146137788,
+          "pred_sol_min": 3.5
+        },
+        {
+          "night": "walch/2598705/1",
+          "fold": "loso:walch/2598705",
+          "n_epochs": 952,
+          "kappa": 0.4470837729253919,
+          "true_tst_min": 466.0,
+          "true_waso_min": 6.5,
+          "true_se": 0.9789915966386554,
+          "true_sol_min": 3.5,
+          "pred_tst_min": 405.0,
+          "pred_waso_min": 65.5,
+          "pred_se": 0.8508403361344538,
+          "pred_sol_min": 5.5
+        },
+        {
+          "night": "walch/2638030/1",
+          "fold": "loso:walch/2638030",
+          "n_epochs": 948,
+          "kappa": 0.7001410829075464,
+          "true_tst_min": 412.5,
+          "true_waso_min": 40.0,
+          "true_se": 0.870253164556962,
+          "true_sol_min": 21.5,
+          "pred_tst_min": 407.0,
+          "pred_waso_min": 41.0,
+          "pred_se": 0.8586497890295358,
+          "pred_sol_min": 26.0
+        },
+        {
+          "night": "walch/3509524/1",
+          "fold": "loso:walch/3509524",
+          "n_epochs": 417,
+          "kappa": 0.43068281776865563,
+          "true_tst_min": 182.0,
+          "true_waso_min": 12.0,
+          "true_se": 0.8729016786570744,
+          "true_sol_min": 14.5,
+          "pred_tst_min": 177.5,
+          "pred_waso_min": 7.5,
+          "pred_se": 0.8513189448441247,
+          "pred_sol_min": 23.5
+        },
+        {
+          "night": "walch/3997827/1",
+          "fold": "loso:walch/3997827",
+          "n_epochs": 958,
+          "kappa": 0.42751978937522733,
+          "true_tst_min": 466.5,
+          "true_waso_min": 3.0,
+          "true_se": 0.9739039665970772,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 390.5,
+          "pred_waso_min": 59.5,
+          "pred_se": 0.8152400835073069,
+          "pred_sol_min": 27.5
+        },
+        {
+          "night": "walch/4018081/1",
+          "fold": "loso:walch/4018081",
+          "n_epochs": 510,
+          "kappa": 0.5454199593465004,
+          "true_tst_min": 209.5,
+          "true_waso_min": 7.5,
+          "true_se": 0.8215686274509804,
+          "true_sol_min": 10.5,
+          "pred_tst_min": 198.5,
+          "pred_waso_min": 38.5,
+          "pred_se": 0.7784313725490196,
+          "pred_sol_min": 18.0
+        },
+        {
+          "night": "walch/4314139/1",
+          "fold": "loso:walch/4314139",
+          "n_epochs": 961,
+          "kappa": 0.4069703979806375,
+          "true_tst_min": 428.5,
+          "true_waso_min": 36.5,
+          "true_se": 0.8917793964620188,
+          "true_sol_min": 11.5,
+          "pred_tst_min": 440.0,
+          "pred_waso_min": 18.5,
+          "pred_se": 0.9157127991675338,
+          "pred_sol_min": 21.5
+        },
+        {
+          "night": "walch/4426783/1",
+          "fold": "loso:walch/4426783",
+          "n_epochs": 980,
+          "kappa": 0.5993420317166265,
+          "true_tst_min": 455.0,
+          "true_waso_min": 22.0,
+          "true_se": 0.9285714285714286,
+          "true_sol_min": 13.0,
+          "pred_tst_min": 434.5,
+          "pred_waso_min": 34.0,
+          "pred_se": 0.886734693877551,
+          "pred_sol_min": 21.5
+        },
+        {
+          "night": "walch/46343/1",
+          "fold": "loso:walch/46343",
+          "n_epochs": 554,
+          "kappa": 0.6642636829870565,
+          "true_tst_min": 234.5,
+          "true_waso_min": 8.5,
+          "true_se": 0.8465703971119134,
+          "true_sol_min": 17.0,
+          "pred_tst_min": 243.5,
+          "pred_waso_min": 16.0,
+          "pred_se": 0.8790613718411552,
+          "pred_sol_min": 17.5
+        },
+        {
+          "night": "walch/5132496/1",
+          "fold": "loso:walch/5132496",
+          "n_epochs": 465,
+          "kappa": 0.47568494279779755,
+          "true_tst_min": 216.0,
+          "true_waso_min": 5.5,
+          "true_se": 0.9290322580645162,
+          "true_sol_min": 11.0,
+          "pred_tst_min": 203.5,
+          "pred_waso_min": 11.0,
+          "pred_se": 0.875268817204301,
+          "pred_sol_min": 18.0
+        },
+        {
+          "night": "walch/5383425/1",
+          "fold": "loso:walch/5383425",
+          "n_epochs": 976,
+          "kappa": 0.641114028251708,
+          "true_tst_min": 468.0,
+          "true_waso_min": 10.5,
+          "true_se": 0.9590163934426229,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 461.0,
+          "pred_waso_min": 8.0,
+          "pred_se": 0.944672131147541,
+          "pred_sol_min": 19.0
+        },
+        {
+          "night": "walch/5498603/1",
+          "fold": "loso:walch/5498603",
+          "n_epochs": 744,
+          "kappa": 0.5000991992635446,
+          "true_tst_min": 318.5,
+          "true_waso_min": 48.5,
+          "true_se": 0.8561827956989247,
+          "true_sol_min": 5.0,
+          "pred_tst_min": 313.5,
+          "pred_waso_min": 38.0,
+          "pred_se": 0.842741935483871,
+          "pred_sol_min": 20.5
+        },
+        {
+          "night": "walch/5797046/1",
+          "fold": "loso:walch/5797046",
+          "n_epochs": 939,
+          "kappa": 0.6014963863515697,
+          "true_tst_min": 430.0,
+          "true_waso_min": 32.0,
+          "true_se": 0.9158679446219382,
+          "true_sol_min": 7.5,
+          "pred_tst_min": 410.5,
+          "pred_waso_min": 46.0,
+          "pred_se": 0.8743343982960596,
+          "pred_sol_min": 13.0
+        },
+        {
+          "night": "walch/6220552/1",
+          "fold": "loso:walch/6220552",
+          "n_epochs": 955,
+          "kappa": 0.42123896069423494,
+          "true_tst_min": 451.0,
+          "true_waso_min": 16.5,
+          "true_se": 0.9445026178010472,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 446.0,
+          "pred_waso_min": 21.0,
+          "pred_se": 0.9340314136125655,
+          "pred_sol_min": 10.5
+        },
+        {
+          "night": "walch/759667/1",
+          "fold": "loso:walch/759667",
+          "n_epochs": 475,
+          "kappa": 0.49981822968246603,
+          "true_tst_min": 228.5,
+          "true_waso_min": 3.0,
+          "true_se": 0.9621052631578947,
+          "true_sol_min": 6.0,
+          "pred_tst_min": 215.5,
+          "pred_waso_min": 14.0,
+          "pred_se": 0.9073684210526316,
+          "pred_sol_min": 8.0
+        },
+        {
+          "night": "walch/7749105/1",
+          "fold": "loso:walch/7749105",
+          "n_epochs": 203,
+          "kappa": 0.3545709802626146,
+          "true_tst_min": 75.0,
+          "true_waso_min": 1.5,
+          "true_se": 0.7389162561576355,
+          "true_sol_min": 17.5,
+          "pred_tst_min": 84.5,
+          "pred_waso_min": 3.0,
+          "pred_se": 0.8325123152709359,
+          "pred_sol_min": 14.0
+        },
+        {
+          "night": "walch/781756/1",
+          "fold": "loso:walch/781756",
+          "n_epochs": 981,
+          "kappa": 0.5338244997103081,
+          "true_tst_min": 449.0,
+          "true_waso_min": 15.0,
+          "true_se": 0.9153924566768603,
+          "true_sol_min": 26.5,
+          "pred_tst_min": 418.5,
+          "pred_waso_min": 50.0,
+          "pred_se": 0.8532110091743119,
+          "pred_sol_min": 22.0
+        },
+        {
+          "night": "walch/8000685/1",
+          "fold": "loso:walch/8000685",
+          "n_epochs": 957,
+          "kappa": 0.5012241400416207,
+          "true_tst_min": 462.0,
+          "true_waso_min": 8.5,
+          "true_se": 0.9655172413793104,
+          "true_sol_min": 8.0,
+          "pred_tst_min": 433.5,
+          "pred_waso_min": 42.0,
+          "pred_se": 0.9059561128526645,
+          "pred_sol_min": 3.0
+        },
+        {
+          "night": "walch/8173033/1",
+          "fold": "loso:walch/8173033",
+          "n_epochs": 955,
+          "kappa": 0.4822385200392073,
+          "true_tst_min": 463.0,
+          "true_waso_min": 5.5,
+          "true_se": 0.9696335078534032,
+          "true_sol_min": 9.0,
+          "pred_tst_min": 438.5,
+          "pred_waso_min": 21.0,
+          "pred_se": 0.9183246073298429,
+          "pred_sol_min": 18.0
+        },
+        {
+          "night": "walch/8258170/1",
+          "fold": "loso:walch/8258170",
+          "n_epochs": 972,
+          "kappa": 0.5373711807323097,
+          "true_tst_min": 438.5,
+          "true_waso_min": 6.5,
+          "true_se": 0.9022633744855967,
+          "true_sol_min": 41.0,
+          "pred_tst_min": 435.0,
+          "pred_waso_min": 17.5,
+          "pred_se": 0.8950617283950617,
+          "pred_sol_min": 33.5
+        },
+        {
+          "night": "walch/844359/1",
+          "fold": "loso:walch/844359",
+          "n_epochs": 897,
+          "kappa": 0.4267701650629772,
+          "true_tst_min": 402.0,
+          "true_waso_min": 33.5,
+          "true_se": 0.8963210702341137,
+          "true_sol_min": 11.0,
+          "pred_tst_min": 374.5,
+          "pred_waso_min": 71.5,
+          "pred_se": 0.835005574136009,
+          "pred_sol_min": 2.5
+        },
+        {
+          "night": "walch/8530312/1",
+          "fold": "loso:walch/8530312",
+          "n_epochs": 947,
+          "kappa": 0.552758475245622,
+          "true_tst_min": 434.5,
+          "true_waso_min": 25.5,
+          "true_se": 0.9176346356916578,
+          "true_sol_min": 13.5,
+          "pred_tst_min": 445.0,
+          "pred_waso_min": 11.5,
+          "pred_se": 0.9398099260823654,
+          "pred_sol_min": 16.5
+        },
+        {
+          "night": "walch/8686948/1",
+          "fold": "loso:walch/8686948",
+          "n_epochs": 955,
+          "kappa": 0.6252142960418058,
+          "true_tst_min": 453.0,
+          "true_waso_min": 9.0,
+          "true_se": 0.9486910994764398,
+          "true_sol_min": 15.5,
+          "pred_tst_min": 435.5,
+          "pred_waso_min": 40.0,
+          "pred_se": 0.912041884816754,
+          "pred_sol_min": 2.0
+        },
+        {
+          "night": "walch/8692923/1",
+          "fold": "loso:walch/8692923",
+          "n_epochs": 936,
+          "kappa": 0.6182427877846702,
+          "true_tst_min": 413.0,
+          "true_waso_min": 46.0,
+          "true_se": 0.8824786324786325,
+          "true_sol_min": 9.0,
+          "pred_tst_min": 419.0,
+          "pred_waso_min": 38.0,
+          "pred_se": 0.8952991452991453,
+          "pred_sol_min": 11.0
+        },
+        {
+          "night": "walch/9106476/1",
+          "fold": "loso:walch/9106476",
+          "n_epochs": 961,
+          "kappa": 0.30908873045353785,
+          "true_tst_min": 437.0,
+          "true_waso_min": 41.5,
+          "true_se": 0.9094693028095734,
+          "true_sol_min": 2.0,
+          "pred_tst_min": 440.0,
+          "pred_waso_min": 19.5,
+          "pred_se": 0.9157127991675338,
+          "pred_sol_min": 21.0
+        },
+        {
+          "night": "walch/9618981/1",
+          "fold": "loso:walch/9618981",
+          "n_epochs": 945,
+          "kappa": 0.5278364753356827,
+          "true_tst_min": 425.5,
+          "true_waso_min": 40.0,
+          "true_se": 0.9005291005291005,
+          "true_sol_min": 7.0,
+          "pred_tst_min": 397.5,
+          "pred_waso_min": 55.5,
+          "pred_se": 0.8412698412698413,
+          "pred_sol_min": 19.0
+        },
+        {
+          "night": "walch/9961348/1",
+          "fold": "loso:walch/9961348",
+          "n_epochs": 720,
+          "kappa": 0.15954949650959194,
+          "true_tst_min": 324.5,
+          "true_waso_min": 18.0,
+          "true_se": 0.9013888888888889,
+          "true_sol_min": 14.0,
+          "pred_tst_min": 317.0,
+          "pred_waso_min": 32.5,
+          "pred_se": 0.8805555555555555,
+          "pred_sol_min": 10.5
+        }
+      ],
+      "seconds": 416.04462716700004
+    },
+    {
+      "model": "tcn_motion_hr",
+      "scheme": "4class",
+      "pooled": {
+        "n_epochs": 25962,
+        "accuracy": 0.6692088436946306,
+        "kappa": 0.4997678927697712,
+        "macro_f1": 0.6456269957640536,
+        "per_class": {
+          "wake": {
+            "support": 2244,
+            "sensitivity": 0.6684491978609626,
+            "precision": 0.529287226534933,
+            "f1": 0.5907837731390311
+          },
+          "light": {
+            "support": 14460,
+            "sensitivity": 0.6289073305670816,
+            "precision": 0.7894097222222223,
+            "f1": 0.7000769822940724
+          },
+          "deep": {
+            "support": 3577,
+            "sensitivity": 0.7489516354487,
+            "precision": 0.5330282530839634,
+            "f1": 0.6228059979077066
+          },
+          "rem": {
+            "support": 5681,
+            "sensitivity": 0.7218799507129027,
+            "precision": 0.6230628988149499,
+            "f1": 0.668841229715404
+          }
+        },
+        "confusion": [
+          [
+            1500,
+            490,
+            60,
+            194
+          ],
+          [
+            1080,
+            9094,
+            2139,
+            2147
+          ],
+          [
+            58,
+            700,
+            2679,
+            140
+          ],
+          [
+            196,
+            1236,
+            148,
+            4101
+          ]
+        ]
+      },
+      "per_subject": {
+        "n_subjects": 31,
+        "kappa_mean": 0.4821068225509926,
+        "kappa_sd": 0.14166195522595018,
+        "accuracy_mean": 0.6602287306111366,
+        "accuracy_sd": 0.09328632838803973
+      },
+      "night_agreement": {
+        "tst_min": {
+          "n": 31,
+          "bias": -9.516129032258064,
+          "loa_low": -47.91536193230215,
+          "loa_high": 28.88310386778602,
+          "mae": 17.967741935483872
+        },
+        "waso_min": {
+          "n": 31,
+          "bias": 7.354838709677419,
+          "loa_low": -27.068320823666763,
+          "loa_high": 41.7779982430216,
+          "mae": 14.516129032258064
+        },
+        "se": {
+          "n": 31,
+          "bias": -0.02877036293382618,
+          "loa_low": -0.14290525528505513,
+          "loa_high": 0.08536452941740277,
+          "mae": 0.04804851231072126
+        },
+        "sol_min": {
+          "n": 31,
+          "bias": 2.9193548387096775,
+          "loa_low": -19.448268402537163,
+          "loa_high": 25.286978079956516,
+          "mae": 8.17741935483871
+        }
+      },
+      "nights": [
+        {
+          "night": "walch/1066528/1",
+          "fold": "loso:walch/1066528",
+          "n_epochs": 885,
+          "kappa": 0.5402013531299791,
+          "true_tst_min": 366.5,
+          "true_waso_min": 46.0,
+          "true_se": 0.8282485875706215,
+          "true_sol_min": 25.0,
+          "pred_tst_min": 380.0,
+          "pred_waso_min": 37.5,
+          "pred_se": 0.8587570621468926,
+          "pred_sol_min": 18.5
+        },
+        {
+          "night": "walch/1360686/1",
+          "fold": "loso:walch/1360686",
+          "n_epochs": 948,
+          "kappa": 0.556969344610554,
+          "true_tst_min": 415.5,
+          "true_waso_min": 22.5,
+          "true_se": 0.8765822784810127,
+          "true_sol_min": 36.0,
+          "pred_tst_min": 436.0,
+          "pred_waso_min": 38.0,
+          "pred_se": 0.919831223628692,
+          "pred_sol_min": 0.0
+        },
+        {
+          "night": "walch/1449548/1",
+          "fold": "loso:walch/1449548",
+          "n_epochs": 953,
+          "kappa": 0.5628636529074782,
+          "true_tst_min": 424.0,
+          "true_waso_min": 20.0,
+          "true_se": 0.8898216159496327,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 441.5,
+          "pred_waso_min": 25.0,
+          "pred_se": 0.9265477439664218,
+          "pred_sol_min": 10.0
+        },
+        {
+          "night": "walch/1455390/1",
+          "fold": "loso:walch/1455390",
+          "n_epochs": 955,
+          "kappa": 0.1420411335545174,
+          "true_tst_min": 435.5,
+          "true_waso_min": 34.5,
+          "true_se": 0.912041884816754,
+          "true_sol_min": 6.0,
+          "pred_tst_min": 461.5,
+          "pred_waso_min": 14.0,
+          "pred_se": 0.9664921465968587,
+          "pred_sol_min": 1.5
+        },
+        {
+          "night": "walch/1818471/1",
+          "fold": "loso:walch/1818471",
+          "n_epochs": 958,
+          "kappa": 0.4379060648558917,
+          "true_tst_min": 474.0,
+          "true_waso_min": 2.5,
+          "true_se": 0.9895615866388309,
+          "true_sol_min": 2.5,
+          "pred_tst_min": 448.0,
+          "pred_waso_min": 27.0,
+          "pred_se": 0.9352818371607515,
+          "pred_sol_min": 4.0
+        },
+        {
+          "night": "walch/2598705/1",
+          "fold": "loso:walch/2598705",
+          "n_epochs": 952,
+          "kappa": 0.42024291497975713,
+          "true_tst_min": 466.0,
+          "true_waso_min": 6.5,
+          "true_se": 0.9789915966386554,
+          "true_sol_min": 3.5,
+          "pred_tst_min": 435.5,
+          "pred_waso_min": 32.0,
+          "pred_se": 0.9149159663865546,
+          "pred_sol_min": 8.5
+        },
+        {
+          "night": "walch/2638030/1",
+          "fold": "loso:walch/2638030",
+          "n_epochs": 948,
+          "kappa": 0.7441977175855905,
+          "true_tst_min": 412.5,
+          "true_waso_min": 40.0,
+          "true_se": 0.870253164556962,
+          "true_sol_min": 21.5,
+          "pred_tst_min": 424.0,
+          "pred_waso_min": 29.5,
+          "pred_se": 0.8945147679324894,
+          "pred_sol_min": 20.5
+        },
+        {
+          "night": "walch/3509524/1",
+          "fold": "loso:walch/3509524",
+          "n_epochs": 417,
+          "kappa": 0.4529935058336644,
+          "true_tst_min": 182.0,
+          "true_waso_min": 12.0,
+          "true_se": 0.8729016786570744,
+          "true_sol_min": 14.5,
+          "pred_tst_min": 186.0,
+          "pred_waso_min": 5.5,
+          "pred_se": 0.8920863309352518,
+          "pred_sol_min": 17.0
+        },
+        {
+          "night": "walch/3997827/1",
+          "fold": "loso:walch/3997827",
+          "n_epochs": 958,
+          "kappa": 0.6830659746217523,
+          "true_tst_min": 466.5,
+          "true_waso_min": 3.0,
+          "true_se": 0.9739039665970772,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 432.5,
+          "pred_waso_min": 32.5,
+          "pred_se": 0.9029227557411273,
+          "pred_sol_min": 14.0
+        },
+        {
+          "night": "walch/4018081/1",
+          "fold": "loso:walch/4018081",
+          "n_epochs": 510,
+          "kappa": 0.5850193525686137,
+          "true_tst_min": 209.5,
+          "true_waso_min": 7.5,
+          "true_se": 0.8215686274509804,
+          "true_sol_min": 10.5,
+          "pred_tst_min": 190.0,
+          "pred_waso_min": 16.0,
+          "pred_se": 0.7450980392156863,
+          "pred_sol_min": 21.5
+        },
+        {
+          "night": "walch/4314139/1",
+          "fold": "loso:walch/4314139",
+          "n_epochs": 961,
+          "kappa": 0.5171897450667854,
+          "true_tst_min": 428.5,
+          "true_waso_min": 36.5,
+          "true_se": 0.8917793964620188,
+          "true_sol_min": 11.5,
+          "pred_tst_min": 440.0,
+          "pred_waso_min": 20.5,
+          "pred_se": 0.9157127991675338,
+          "pred_sol_min": 17.0
+        },
+        {
+          "night": "walch/4426783/1",
+          "fold": "loso:walch/4426783",
+          "n_epochs": 980,
+          "kappa": 0.5835364405614509,
+          "true_tst_min": 455.0,
+          "true_waso_min": 22.0,
+          "true_se": 0.9285714285714286,
+          "true_sol_min": 13.0,
+          "pred_tst_min": 425.5,
+          "pred_waso_min": 47.5,
+          "pred_se": 0.8683673469387755,
+          "pred_sol_min": 17.0
+        },
+        {
+          "night": "walch/46343/1",
+          "fold": "loso:walch/46343",
+          "n_epochs": 554,
+          "kappa": 0.5088899347934365,
+          "true_tst_min": 234.5,
+          "true_waso_min": 8.5,
+          "true_se": 0.8465703971119134,
+          "true_sol_min": 17.0,
+          "pred_tst_min": 242.0,
+          "pred_waso_min": 8.0,
+          "pred_se": 0.8736462093862816,
+          "pred_sol_min": 13.5
+        },
+        {
+          "night": "walch/5132496/1",
+          "fold": "loso:walch/5132496",
+          "n_epochs": 465,
+          "kappa": 0.5020169207153821,
+          "true_tst_min": 216.0,
+          "true_waso_min": 5.5,
+          "true_se": 0.9290322580645162,
+          "true_sol_min": 11.0,
+          "pred_tst_min": 196.5,
+          "pred_waso_min": 15.0,
+          "pred_se": 0.8451612903225807,
+          "pred_sol_min": 21.0
+        },
+        {
+          "night": "walch/5383425/1",
+          "fold": "loso:walch/5383425",
+          "n_epochs": 976,
+          "kappa": 0.4779208606643387,
+          "true_tst_min": 468.0,
+          "true_waso_min": 10.5,
+          "true_se": 0.9590163934426229,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 450.5,
+          "pred_waso_min": 15.0,
+          "pred_se": 0.923155737704918,
+          "pred_sol_min": 22.5
+        },
+        {
+          "night": "walch/5498603/1",
+          "fold": "loso:walch/5498603",
+          "n_epochs": 744,
+          "kappa": 0.2894743514258911,
+          "true_tst_min": 318.5,
+          "true_waso_min": 48.5,
+          "true_se": 0.8561827956989247,
+          "true_sol_min": 5.0,
+          "pred_tst_min": 316.0,
+          "pred_waso_min": 38.5,
+          "pred_se": 0.8494623655913979,
+          "pred_sol_min": 17.5
+        },
+        {
+          "night": "walch/5797046/1",
+          "fold": "loso:walch/5797046",
+          "n_epochs": 939,
+          "kappa": 0.5524308865586274,
+          "true_tst_min": 430.0,
+          "true_waso_min": 32.0,
+          "true_se": 0.9158679446219382,
+          "true_sol_min": 7.5,
+          "pred_tst_min": 425.5,
+          "pred_waso_min": 31.0,
+          "pred_se": 0.906283280085197,
+          "pred_sol_min": 13.0
+        },
+        {
+          "night": "walch/6220552/1",
+          "fold": "loso:walch/6220552",
+          "n_epochs": 955,
+          "kappa": 0.4090678080767745,
+          "true_tst_min": 451.0,
+          "true_waso_min": 16.5,
+          "true_se": 0.9445026178010472,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 448.0,
+          "pred_waso_min": 11.5,
+          "pred_se": 0.9382198952879581,
+          "pred_sol_min": 17.5
+        },
+        {
+          "night": "walch/759667/1",
+          "fold": "loso:walch/759667",
+          "n_epochs": 475,
+          "kappa": 0.54324339611969,
+          "true_tst_min": 228.5,
+          "true_waso_min": 3.0,
+          "true_se": 0.9621052631578947,
+          "true_sol_min": 6.0,
+          "pred_tst_min": 219.0,
+          "pred_waso_min": 12.5,
+          "pred_se": 0.9221052631578948,
+          "pred_sol_min": 6.0
+        },
+        {
+          "night": "walch/7749105/1",
+          "fold": "loso:walch/7749105",
+          "n_epochs": 203,
+          "kappa": 0.13460060102033686,
+          "true_tst_min": 75.0,
+          "true_waso_min": 1.5,
+          "true_se": 0.7389162561576355,
+          "true_sol_min": 17.5,
+          "pred_tst_min": 51.5,
+          "pred_waso_min": 6.0,
+          "pred_se": 0.5073891625615764,
+          "pred_sol_min": 44.0
+        },
+        {
+          "night": "walch/781756/1",
+          "fold": "loso:walch/781756",
+          "n_epochs": 981,
+          "kappa": 0.4845992845921203,
+          "true_tst_min": 449.0,
+          "true_waso_min": 15.0,
+          "true_se": 0.9153924566768603,
+          "true_sol_min": 26.5,
+          "pred_tst_min": 400.5,
+          "pred_waso_min": 68.5,
+          "pred_se": 0.8165137614678899,
+          "pred_sol_min": 21.0
+        },
+        {
+          "night": "walch/8000685/1",
+          "fold": "loso:walch/8000685",
+          "n_epochs": 957,
+          "kappa": 0.5404591191179128,
+          "true_tst_min": 462.0,
+          "true_waso_min": 8.5,
+          "true_se": 0.9655172413793104,
+          "true_sol_min": 8.0,
+          "pred_tst_min": 425.5,
+          "pred_waso_min": 23.0,
+          "pred_se": 0.8892371995820272,
+          "pred_sol_min": 30.0
+        },
+        {
+          "night": "walch/8173033/1",
+          "fold": "loso:walch/8173033",
+          "n_epochs": 955,
+          "kappa": 0.5118474793695107,
+          "true_tst_min": 463.0,
+          "true_waso_min": 5.5,
+          "true_se": 0.9696335078534032,
+          "true_sol_min": 9.0,
+          "pred_tst_min": 450.5,
+          "pred_waso_min": 13.0,
+          "pred_se": 0.9434554973821989,
+          "pred_sol_min": 14.0
+        },
+        {
+          "night": "walch/8258170/1",
+          "fold": "loso:walch/8258170",
+          "n_epochs": 972,
+          "kappa": 0.492579947579421,
+          "true_tst_min": 438.5,
+          "true_waso_min": 6.5,
+          "true_se": 0.9022633744855967,
+          "true_sol_min": 41.0,
+          "pred_tst_min": 449.5,
+          "pred_waso_min": 7.0,
+          "pred_se": 0.9248971193415638,
+          "pred_sol_min": 23.0
+        },
+        {
+          "night": "walch/844359/1",
+          "fold": "loso:walch/844359",
+          "n_epochs": 897,
+          "kappa": 0.3710345706818521,
+          "true_tst_min": 402.0,
+          "true_waso_min": 33.5,
+          "true_se": 0.8963210702341137,
+          "true_sol_min": 11.0,
+          "pred_tst_min": 373.0,
+          "pred_waso_min": 62.5,
+          "pred_se": 0.8316610925306578,
+          "pred_sol_min": 10.5
+        },
+        {
+          "night": "walch/8530312/1",
+          "fold": "loso:walch/8530312",
+          "n_epochs": 947,
+          "kappa": 0.6435507677540032,
+          "true_tst_min": 434.5,
+          "true_waso_min": 25.5,
+          "true_se": 0.9176346356916578,
+          "true_sol_min": 13.5,
+          "pred_tst_min": 396.5,
+          "pred_waso_min": 59.5,
+          "pred_se": 0.8373812038014784,
+          "pred_sol_min": 15.0
+        },
+        {
+          "night": "walch/8686948/1",
+          "fold": "loso:walch/8686948",
+          "n_epochs": 955,
+          "kappa": 0.6224957954435235,
+          "true_tst_min": 453.0,
+          "true_waso_min": 9.0,
+          "true_se": 0.9486910994764398,
+          "true_sol_min": 15.5,
+          "pred_tst_min": 445.0,
+          "pred_waso_min": 20.5,
+          "pred_se": 0.9319371727748691,
+          "pred_sol_min": 12.0
+        },
+        {
+          "night": "walch/8692923/1",
+          "fold": "loso:walch/8692923",
+          "n_epochs": 936,
+          "kappa": 0.5779945092872034,
+          "true_tst_min": 413.0,
+          "true_waso_min": 46.0,
+          "true_se": 0.8824786324786325,
+          "true_sol_min": 9.0,
+          "pred_tst_min": 415.5,
+          "pred_waso_min": 38.0,
+          "pred_se": 0.8878205128205128,
+          "pred_sol_min": 14.5
+        },
+        {
+          "night": "walch/9106476/1",
+          "fold": "loso:walch/9106476",
+          "n_epochs": 961,
+          "kappa": 0.3194929203344863,
+          "true_tst_min": 437.0,
+          "true_waso_min": 41.5,
+          "true_se": 0.9094693028095734,
+          "true_sol_min": 2.0,
+          "pred_tst_min": 442.5,
+          "pred_waso_min": 17.0,
+          "pred_se": 0.9209157127991675,
+          "pred_sol_min": 21.0
+        },
+        {
+          "night": "walch/9618981/1",
+          "fold": "loso:walch/9618981",
+          "n_epochs": 945,
+          "kappa": 0.5032050720396455,
+          "true_tst_min": 425.5,
+          "true_waso_min": 40.0,
+          "true_se": 0.9005291005291005,
+          "true_sol_min": 7.0,
+          "pred_tst_min": 415.5,
+          "pred_waso_min": 41.0,
+          "pred_se": 0.8793650793650793,
+          "pred_sol_min": 16.0
+        },
+        {
+          "night": "walch/9961348/1",
+          "fold": "loso:walch/9961348",
+          "n_epochs": 720,
+          "kappa": 0.23418007323057835,
+          "true_tst_min": 324.5,
+          "true_waso_min": 18.0,
+          "true_se": 0.9013888888888889,
+          "true_sol_min": 14.0,
+          "pred_tst_min": 300.5,
+          "pred_waso_min": 43.5,
+          "pred_se": 0.8347222222222223,
+          "pred_sol_min": 11.5
+        }
+      ],
+      "seconds": 462.152758167
+    },
+    {
+      "model": "gru_hr",
+      "scheme": "4class",
+      "pooled": {
+        "n_epochs": 25962,
+        "accuracy": 0.6133579847469378,
+        "kappa": 0.4320351610296619,
+        "macro_f1": 0.57991341535672,
+        "per_class": {
+          "wake": {
+            "support": 2244,
+            "sensitivity": 0.5868983957219251,
+            "precision": 0.3810763888888889,
+            "f1": 0.4621052631578948
+          },
+          "light": {
+            "support": 14460,
+            "sensitivity": 0.5600276625172891,
+            "precision": 0.7867482755270572,
+            "f1": 0.6543045287439906
+          },
+          "deep": {
+            "support": 3577,
+            "sensitivity": 0.7019849035504613,
+            "precision": 0.489569116786898,
+            "f1": 0.5768435561681599
+          },
+          "rem": {
+            "support": 5681,
+            "sensitivity": 0.7037493399049463,
+            "precision": 0.5643704121964992,
+            "f1": 0.626400313356835
+          }
+        },
+        "confusion": [
+          [
+            1317,
+            471,
+            64,
+            392
+          ],
+          [
+            1538,
+            8098,
+            2320,
+            2504
+          ],
+          [
+            112,
+            764,
+            2511,
+            190
+          ],
+          [
+            489,
+            960,
+            234,
+            3998
+          ]
+        ]
+      },
+      "per_subject": {
+        "n_subjects": 31,
+        "kappa_mean": 0.4153421024356729,
+        "kappa_sd": 0.13890665970359414,
+        "accuracy_mean": 0.603560089973811,
+        "accuracy_sd": 0.10058213695089535
+      },
+      "night_agreement": {
+        "tst_min": {
+          "n": 31,
+          "bias": -19.548387096774192,
+          "loa_low": -71.91766205012624,
+          "loa_high": 32.82088785657785,
+          "mae": 25.161290322580644
+        },
+        "waso_min": {
+          "n": 31,
+          "bias": 17.870967741935484,
+          "loa_low": -29.41676077146415,
+          "loa_high": 65.15869625533512,
+          "mae": 22.774193548387096
+        },
+        "se": {
+          "n": 31,
+          "bias": -0.04997133505181293,
+          "loa_low": -0.17943020847846122,
+          "loa_high": 0.07948753837483538,
+          "mae": 0.06312611222245759
+        },
+        "sol_min": {
+          "n": 31,
+          "bias": 3.7096774193548385,
+          "loa_low": -20.58137653813312,
+          "loa_high": 28.0007313768428,
+          "mae": 9.129032258064516
+        }
+      },
+      "nights": [
+        {
+          "night": "walch/1066528/1",
+          "fold": "loso:walch/1066528",
+          "n_epochs": 885,
+          "kappa": 0.6209962532512918,
+          "true_tst_min": 366.5,
+          "true_waso_min": 46.0,
+          "true_se": 0.8282485875706215,
+          "true_sol_min": 25.0,
+          "pred_tst_min": 357.0,
+          "pred_waso_min": 55.0,
+          "pred_se": 0.8067796610169492,
+          "pred_sol_min": 30.5
+        },
+        {
+          "night": "walch/1360686/1",
+          "fold": "loso:walch/1360686",
+          "n_epochs": 948,
+          "kappa": 0.5544559591193239,
+          "true_tst_min": 415.5,
+          "true_waso_min": 22.5,
+          "true_se": 0.8765822784810127,
+          "true_sol_min": 36.0,
+          "pred_tst_min": 454.0,
+          "pred_waso_min": 17.0,
+          "pred_se": 0.9578059071729957,
+          "pred_sol_min": 3.0
+        },
+        {
+          "night": "walch/1449548/1",
+          "fold": "loso:walch/1449548",
+          "n_epochs": 953,
+          "kappa": 0.4511617761750754,
+          "true_tst_min": 424.0,
+          "true_waso_min": 20.0,
+          "true_se": 0.8898216159496327,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 444.5,
+          "pred_waso_min": 11.0,
+          "pred_se": 0.9328436516264428,
+          "pred_sol_min": 21.0
+        },
+        {
+          "night": "walch/1455390/1",
+          "fold": "loso:walch/1455390",
+          "n_epochs": 955,
+          "kappa": 0.023143706438923366,
+          "true_tst_min": 435.5,
+          "true_waso_min": 34.5,
+          "true_se": 0.912041884816754,
+          "true_sol_min": 6.0,
+          "pred_tst_min": 443.0,
+          "pred_waso_min": 29.0,
+          "pred_se": 0.9277486910994764,
+          "pred_sol_min": 4.5
+        },
+        {
+          "night": "walch/1818471/1",
+          "fold": "loso:walch/1818471",
+          "n_epochs": 958,
+          "kappa": 0.5380652343459252,
+          "true_tst_min": 474.0,
+          "true_waso_min": 2.5,
+          "true_se": 0.9895615866388309,
+          "true_sol_min": 2.5,
+          "pred_tst_min": 431.5,
+          "pred_waso_min": 42.0,
+          "pred_se": 0.9008350730688935,
+          "pred_sol_min": 5.5
+        },
+        {
+          "night": "walch/2598705/1",
+          "fold": "loso:walch/2598705",
+          "n_epochs": 952,
+          "kappa": 0.34579123767270276,
+          "true_tst_min": 466.0,
+          "true_waso_min": 6.5,
+          "true_se": 0.9789915966386554,
+          "true_sol_min": 3.5,
+          "pred_tst_min": 370.5,
+          "pred_waso_min": 103.0,
+          "pred_se": 0.7783613445378151,
+          "pred_sol_min": 2.5
+        },
+        {
+          "night": "walch/2638030/1",
+          "fold": "loso:walch/2638030",
+          "n_epochs": 948,
+          "kappa": 0.5279911943796844,
+          "true_tst_min": 412.5,
+          "true_waso_min": 40.0,
+          "true_se": 0.870253164556962,
+          "true_sol_min": 21.5,
+          "pred_tst_min": 399.0,
+          "pred_waso_min": 55.0,
+          "pred_se": 0.8417721518987342,
+          "pred_sol_min": 20.0
+        },
+        {
+          "night": "walch/3509524/1",
+          "fold": "loso:walch/3509524",
+          "n_epochs": 417,
+          "kappa": 0.3678797065915172,
+          "true_tst_min": 182.0,
+          "true_waso_min": 12.0,
+          "true_se": 0.8729016786570744,
+          "true_sol_min": 14.5,
+          "pred_tst_min": 189.5,
+          "pred_waso_min": 9.5,
+          "pred_se": 0.9088729016786571,
+          "pred_sol_min": 9.5
+        },
+        {
+          "night": "walch/3997827/1",
+          "fold": "loso:walch/3997827",
+          "n_epochs": 958,
+          "kappa": 0.5082474368867821,
+          "true_tst_min": 466.5,
+          "true_waso_min": 3.0,
+          "true_se": 0.9739039665970772,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 403.0,
+          "pred_waso_min": 43.5,
+          "pred_se": 0.8413361169102297,
+          "pred_sol_min": 32.5
+        },
+        {
+          "night": "walch/4018081/1",
+          "fold": "loso:walch/4018081",
+          "n_epochs": 510,
+          "kappa": 0.3845355758204554,
+          "true_tst_min": 209.5,
+          "true_waso_min": 7.5,
+          "true_se": 0.8215686274509804,
+          "true_sol_min": 10.5,
+          "pred_tst_min": 210.0,
+          "pred_waso_min": 25.5,
+          "pred_se": 0.8235294117647058,
+          "pred_sol_min": 19.5
+        },
+        {
+          "night": "walch/4314139/1",
+          "fold": "loso:walch/4314139",
+          "n_epochs": 961,
+          "kappa": 0.4610067725505833,
+          "true_tst_min": 428.5,
+          "true_waso_min": 36.5,
+          "true_se": 0.8917793964620188,
+          "true_sol_min": 11.5,
+          "pred_tst_min": 441.0,
+          "pred_waso_min": 26.5,
+          "pred_se": 0.9177939646201873,
+          "pred_sol_min": 13.0
+        },
+        {
+          "night": "walch/4426783/1",
+          "fold": "loso:walch/4426783",
+          "n_epochs": 980,
+          "kappa": 0.40846071809456097,
+          "true_tst_min": 455.0,
+          "true_waso_min": 22.0,
+          "true_se": 0.9285714285714286,
+          "true_sol_min": 13.0,
+          "pred_tst_min": 413.0,
+          "pred_waso_min": 46.0,
+          "pred_se": 0.8428571428571429,
+          "pred_sol_min": 31.0
+        },
+        {
+          "night": "walch/46343/1",
+          "fold": "loso:walch/46343",
+          "n_epochs": 554,
+          "kappa": 0.5482515289320997,
+          "true_tst_min": 234.5,
+          "true_waso_min": 8.5,
+          "true_se": 0.8465703971119134,
+          "true_sol_min": 17.0,
+          "pred_tst_min": 218.0,
+          "pred_waso_min": 47.0,
+          "pred_se": 0.7870036101083032,
+          "pred_sol_min": 12.0
+        },
+        {
+          "night": "walch/5132496/1",
+          "fold": "loso:walch/5132496",
+          "n_epochs": 465,
+          "kappa": 0.25992120437289645,
+          "true_tst_min": 216.0,
+          "true_waso_min": 5.5,
+          "true_se": 0.9290322580645162,
+          "true_sol_min": 11.0,
+          "pred_tst_min": 198.0,
+          "pred_waso_min": 13.0,
+          "pred_se": 0.8516129032258064,
+          "pred_sol_min": 21.5
+        },
+        {
+          "night": "walch/5383425/1",
+          "fold": "loso:walch/5383425",
+          "n_epochs": 976,
+          "kappa": 0.43909374383264255,
+          "true_tst_min": 468.0,
+          "true_waso_min": 10.5,
+          "true_se": 0.9590163934426229,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 465.0,
+          "pred_waso_min": 12.0,
+          "pred_se": 0.9528688524590164,
+          "pred_sol_min": 11.0
+        },
+        {
+          "night": "walch/5498603/1",
+          "fold": "loso:walch/5498603",
+          "n_epochs": 744,
+          "kappa": 0.3997789508501787,
+          "true_tst_min": 318.5,
+          "true_waso_min": 48.5,
+          "true_se": 0.8561827956989247,
+          "true_sol_min": 5.0,
+          "pred_tst_min": 315.5,
+          "pred_waso_min": 25.5,
+          "pred_se": 0.8481182795698925,
+          "pred_sol_min": 31.0
+        },
+        {
+          "night": "walch/5797046/1",
+          "fold": "loso:walch/5797046",
+          "n_epochs": 939,
+          "kappa": 0.5301294645106038,
+          "true_tst_min": 430.0,
+          "true_waso_min": 32.0,
+          "true_se": 0.9158679446219382,
+          "true_sol_min": 7.5,
+          "pred_tst_min": 370.5,
+          "pred_waso_min": 86.0,
+          "pred_se": 0.7891373801916933,
+          "pred_sol_min": 13.0
+        },
+        {
+          "night": "walch/6220552/1",
+          "fold": "loso:walch/6220552",
+          "n_epochs": 955,
+          "kappa": 0.31239999999999996,
+          "true_tst_min": 451.0,
+          "true_waso_min": 16.5,
+          "true_se": 0.9445026178010472,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 414.0,
+          "pred_waso_min": 40.0,
+          "pred_se": 0.8670157068062827,
+          "pred_sol_min": 23.5
+        },
+        {
+          "night": "walch/759667/1",
+          "fold": "loso:walch/759667",
+          "n_epochs": 475,
+          "kappa": 0.489745809009938,
+          "true_tst_min": 228.5,
+          "true_waso_min": 3.0,
+          "true_se": 0.9621052631578947,
+          "true_sol_min": 6.0,
+          "pred_tst_min": 203.0,
+          "pred_waso_min": 24.0,
+          "pred_se": 0.8547368421052631,
+          "pred_sol_min": 10.5
+        },
+        {
+          "night": "walch/7749105/1",
+          "fold": "loso:walch/7749105",
+          "n_epochs": 203,
+          "kappa": 0.12829842331268237,
+          "true_tst_min": 75.0,
+          "true_waso_min": 1.5,
+          "true_se": 0.7389162561576355,
+          "true_sol_min": 17.5,
+          "pred_tst_min": 53.0,
+          "pred_waso_min": 30.5,
+          "pred_se": 0.5221674876847291,
+          "pred_sol_min": 18.0
+        },
+        {
+          "night": "walch/781756/1",
+          "fold": "loso:walch/781756",
+          "n_epochs": 981,
+          "kappa": 0.5402787028307544,
+          "true_tst_min": 449.0,
+          "true_waso_min": 15.0,
+          "true_se": 0.9153924566768603,
+          "true_sol_min": 26.5,
+          "pred_tst_min": 417.0,
+          "pred_waso_min": 48.5,
+          "pred_se": 0.8501529051987767,
+          "pred_sol_min": 25.0
+        },
+        {
+          "night": "walch/8000685/1",
+          "fold": "loso:walch/8000685",
+          "n_epochs": 957,
+          "kappa": 0.4109836241698731,
+          "true_tst_min": 462.0,
+          "true_waso_min": 8.5,
+          "true_se": 0.9655172413793104,
+          "true_sol_min": 8.0,
+          "pred_tst_min": 422.5,
+          "pred_waso_min": 48.0,
+          "pred_se": 0.8829676071055381,
+          "pred_sol_min": 8.0
+        },
+        {
+          "night": "walch/8173033/1",
+          "fold": "loso:walch/8173033",
+          "n_epochs": 955,
+          "kappa": 0.45166708284756796,
+          "true_tst_min": 463.0,
+          "true_waso_min": 5.5,
+          "true_se": 0.9696335078534032,
+          "true_sol_min": 9.0,
+          "pred_tst_min": 415.0,
+          "pred_waso_min": 49.0,
+          "pred_se": 0.8691099476439791,
+          "pred_sol_min": 13.5
+        },
+        {
+          "night": "walch/8258170/1",
+          "fold": "loso:walch/8258170",
+          "n_epochs": 972,
+          "kappa": 0.39953884737516876,
+          "true_tst_min": 438.5,
+          "true_waso_min": 6.5,
+          "true_se": 0.9022633744855967,
+          "true_sol_min": 41.0,
+          "pred_tst_min": 430.5,
+          "pred_waso_min": 23.0,
+          "pred_se": 0.8858024691358025,
+          "pred_sol_min": 16.5
+        },
+        {
+          "night": "walch/844359/1",
+          "fold": "loso:walch/844359",
+          "n_epochs": 897,
+          "kappa": 0.3177134954477353,
+          "true_tst_min": 402.0,
+          "true_waso_min": 33.5,
+          "true_se": 0.8963210702341137,
+          "true_sol_min": 11.0,
+          "pred_tst_min": 380.5,
+          "pred_waso_min": 45.5,
+          "pred_se": 0.8483835005574136,
+          "pred_sol_min": 22.5
+        },
+        {
+          "night": "walch/8530312/1",
+          "fold": "loso:walch/8530312",
+          "n_epochs": 947,
+          "kappa": 0.5585245952057599,
+          "true_tst_min": 434.5,
+          "true_waso_min": 25.5,
+          "true_se": 0.9176346356916578,
+          "true_sol_min": 13.5,
+          "pred_tst_min": 412.0,
+          "pred_waso_min": 42.0,
+          "pred_se": 0.870116156282999,
+          "pred_sol_min": 17.0
+        },
+        {
+          "night": "walch/8686948/1",
+          "fold": "loso:walch/8686948",
+          "n_epochs": 955,
+          "kappa": 0.44080664373569595,
+          "true_tst_min": 453.0,
+          "true_waso_min": 9.0,
+          "true_se": 0.9486910994764398,
+          "true_sol_min": 15.5,
+          "pred_tst_min": 419.0,
+          "pred_waso_min": 29.5,
+          "pred_se": 0.8774869109947644,
+          "pred_sol_min": 29.0
+        },
+        {
+          "night": "walch/8692923/1",
+          "fold": "loso:walch/8692923",
+          "n_epochs": 936,
+          "kappa": 0.5517377928051417,
+          "true_tst_min": 413.0,
+          "true_waso_min": 46.0,
+          "true_se": 0.8824786324786325,
+          "true_sol_min": 9.0,
+          "pred_tst_min": 406.0,
+          "pred_waso_min": 47.5,
+          "pred_se": 0.8675213675213675,
+          "pred_sol_min": 14.5
+        },
+        {
+          "night": "walch/9106476/1",
+          "fold": "loso:walch/9106476",
+          "n_epochs": 961,
+          "kappa": 0.2359589723162717,
+          "true_tst_min": 437.0,
+          "true_waso_min": 41.5,
+          "true_se": 0.9094693028095734,
+          "true_sol_min": 2.0,
+          "pred_tst_min": 431.0,
+          "pred_waso_min": 21.0,
+          "pred_se": 0.8969823100936525,
+          "pred_sol_min": 28.5
+        },
+        {
+          "night": "walch/9618981/1",
+          "fold": "loso:walch/9618981",
+          "n_epochs": 945,
+          "kappa": 0.4918323084796153,
+          "true_tst_min": 425.5,
+          "true_waso_min": 40.0,
+          "true_se": 0.9005291005291005,
+          "true_sol_min": 7.0,
+          "pred_tst_min": 413.0,
+          "pred_waso_min": 59.5,
+          "pred_se": 0.8740740740740741,
+          "pred_sol_min": 0.0
+        },
+        {
+          "night": "walch/9961348/1",
+          "fold": "loso:walch/9961348",
+          "n_epochs": 720,
+          "kappa": 0.17720841414440677,
+          "true_tst_min": 324.5,
+          "true_waso_min": 18.0,
+          "true_se": 0.9013888888888889,
+          "true_sol_min": 14.0,
+          "pred_tst_min": 313.5,
+          "pred_waso_min": 27.5,
+          "pred_se": 0.8708333333333333,
+          "pred_sol_min": 10.0
+        }
+      ],
+      "seconds": 4422.5344682919995
+    },
+    {
+      "model": "gru_motion_hr",
+      "scheme": "4class",
+      "pooled": {
+        "n_epochs": 25962,
+        "accuracy": 0.6301132424312457,
+        "kappa": 0.451977562549642,
+        "macro_f1": 0.6065454835705895,
+        "per_class": {
+          "wake": {
+            "support": 2244,
+            "sensitivity": 0.6902852049910874,
+            "precision": 0.4420662100456621,
+            "f1": 0.5389700765483646
+          },
+          "light": {
+            "support": 14460,
+            "sensitivity": 0.5795297372060858,
+            "precision": 0.7815706024995337,
+            "f1": 0.6655547613374633
+          },
+          "deep": {
+            "support": 3577,
+            "sensitivity": 0.7195974280123009,
+            "precision": 0.5166599759132878,
+            "f1": 0.601472134595163
+          },
+          "rem": {
+            "support": 5681,
+            "sensitivity": 0.6787537405386376,
+            "precision": 0.5709209357417826,
+            "f1": 0.6201849618013671
+          }
+        },
+        "confusion": [
+          [
+            1549,
+            437,
+            60,
+            198
+          ],
+          [
+            1421,
+            8380,
+            2123,
+            2536
+          ],
+          [
+            82,
+            757,
+            2574,
+            164
+          ],
+          [
+            452,
+            1148,
+            225,
+            3856
+          ]
+        ]
+      },
+      "per_subject": {
+        "n_subjects": 31,
+        "kappa_mean": 0.43443488972990013,
+        "kappa_sd": 0.13441578696171202,
+        "accuracy_mean": 0.6229781888288529,
+        "accuracy_sd": 0.08710591306539599
+      },
+      "night_agreement": {
+        "tst_min": {
+          "n": 31,
+          "bias": -20.322580645161292,
+          "loa_low": -77.0495702656043,
+          "loa_high": 36.404408975281726,
+          "mae": 27.548387096774192
+        },
+        "waso_min": {
+          "n": 31,
+          "bias": 18.0,
+          "loa_low": -40.42257759918962,
+          "loa_high": 76.42257759918962,
+          "mae": 25.032258064516128
+        },
+        "se": {
+          "n": 31,
+          "bias": -0.04614678854778843,
+          "loa_low": -0.18451265158338465,
+          "loa_high": 0.0922190744878078,
+          "mae": 0.06754294868256203
+        },
+        "sol_min": {
+          "n": 31,
+          "bias": 3.725806451612903,
+          "loa_low": -19.066781081434172,
+          "loa_high": 26.51839398465998,
+          "mae": 9.112903225806452
+        }
+      },
+      "nights": [
+        {
+          "night": "walch/1066528/1",
+          "fold": "loso:walch/1066528",
+          "n_epochs": 885,
+          "kappa": 0.5852750084014786,
+          "true_tst_min": 366.5,
+          "true_waso_min": 46.0,
+          "true_se": 0.8282485875706215,
+          "true_sol_min": 25.0,
+          "pred_tst_min": 386.0,
+          "pred_waso_min": 30.0,
+          "pred_se": 0.8723163841807909,
+          "pred_sol_min": 13.5
+        },
+        {
+          "night": "walch/1360686/1",
+          "fold": "loso:walch/1360686",
+          "n_epochs": 948,
+          "kappa": 0.5869597901293282,
+          "true_tst_min": 415.5,
+          "true_waso_min": 22.5,
+          "true_se": 0.8765822784810127,
+          "true_sol_min": 36.0,
+          "pred_tst_min": 384.5,
+          "pred_waso_min": 86.5,
+          "pred_se": 0.8111814345991561,
+          "pred_sol_min": 1.0
+        },
+        {
+          "night": "walch/1449548/1",
+          "fold": "loso:walch/1449548",
+          "n_epochs": 953,
+          "kappa": 0.3791853736711401,
+          "true_tst_min": 424.0,
+          "true_waso_min": 20.0,
+          "true_se": 0.8898216159496327,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 336.0,
+          "pred_waso_min": 121.5,
+          "pred_se": 0.7051416579223505,
+          "pred_sol_min": 19.0
+        },
+        {
+          "night": "walch/1455390/1",
+          "fold": "loso:walch/1455390",
+          "n_epochs": 955,
+          "kappa": 0.031490634181928906,
+          "true_tst_min": 435.5,
+          "true_waso_min": 34.5,
+          "true_se": 0.912041884816754,
+          "true_sol_min": 6.0,
+          "pred_tst_min": 461.5,
+          "pred_waso_min": 13.0,
+          "pred_se": 0.9664921465968587,
+          "pred_sol_min": 2.5
+        },
+        {
+          "night": "walch/1818471/1",
+          "fold": "loso:walch/1818471",
+          "n_epochs": 958,
+          "kappa": 0.4154673880372708,
+          "true_tst_min": 474.0,
+          "true_waso_min": 2.5,
+          "true_se": 0.9895615866388309,
+          "true_sol_min": 2.5,
+          "pred_tst_min": 428.5,
+          "pred_waso_min": 32.5,
+          "pred_se": 0.894572025052192,
+          "pred_sol_min": 18.0
+        },
+        {
+          "night": "walch/2598705/1",
+          "fold": "loso:walch/2598705",
+          "n_epochs": 952,
+          "kappa": 0.4937734886428145,
+          "true_tst_min": 466.0,
+          "true_waso_min": 6.5,
+          "true_se": 0.9789915966386554,
+          "true_sol_min": 3.5,
+          "pred_tst_min": 438.0,
+          "pred_waso_min": 31.5,
+          "pred_se": 0.9201680672268907,
+          "pred_sol_min": 6.5
+        },
+        {
+          "night": "walch/2638030/1",
+          "fold": "loso:walch/2638030",
+          "n_epochs": 948,
+          "kappa": 0.6544605255596693,
+          "true_tst_min": 412.5,
+          "true_waso_min": 40.0,
+          "true_se": 0.870253164556962,
+          "true_sol_min": 21.5,
+          "pred_tst_min": 418.0,
+          "pred_waso_min": 34.0,
+          "pred_se": 0.8818565400843882,
+          "pred_sol_min": 22.0
+        },
+        {
+          "night": "walch/3509524/1",
+          "fold": "loso:walch/3509524",
+          "n_epochs": 417,
+          "kappa": 0.3336451330020462,
+          "true_tst_min": 182.0,
+          "true_waso_min": 12.0,
+          "true_se": 0.8729016786570744,
+          "true_sol_min": 14.5,
+          "pred_tst_min": 190.5,
+          "pred_waso_min": 2.5,
+          "pred_se": 0.9136690647482014,
+          "pred_sol_min": 15.5
+        },
+        {
+          "night": "walch/3997827/1",
+          "fold": "loso:walch/3997827",
+          "n_epochs": 958,
+          "kappa": 0.5044015129670777,
+          "true_tst_min": 466.5,
+          "true_waso_min": 3.0,
+          "true_se": 0.9739039665970772,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 419.5,
+          "pred_waso_min": 30.5,
+          "pred_se": 0.8757828810020877,
+          "pred_sol_min": 28.0
+        },
+        {
+          "night": "walch/4018081/1",
+          "fold": "loso:walch/4018081",
+          "n_epochs": 510,
+          "kappa": 0.4566957236486341,
+          "true_tst_min": 209.5,
+          "true_waso_min": 7.5,
+          "true_se": 0.8215686274509804,
+          "true_sol_min": 10.5,
+          "pred_tst_min": 180.0,
+          "pred_waso_min": 51.5,
+          "pred_se": 0.7058823529411765,
+          "pred_sol_min": 23.5
+        },
+        {
+          "night": "walch/4314139/1",
+          "fold": "loso:walch/4314139",
+          "n_epochs": 961,
+          "kappa": 0.502845318158303,
+          "true_tst_min": 428.5,
+          "true_waso_min": 36.5,
+          "true_se": 0.8917793964620188,
+          "true_sol_min": 11.5,
+          "pred_tst_min": 441.0,
+          "pred_waso_min": 21.0,
+          "pred_se": 0.9177939646201873,
+          "pred_sol_min": 15.5
+        },
+        {
+          "night": "walch/4426783/1",
+          "fold": "loso:walch/4426783",
+          "n_epochs": 980,
+          "kappa": 0.4622009399976987,
+          "true_tst_min": 455.0,
+          "true_waso_min": 22.0,
+          "true_se": 0.9285714285714286,
+          "true_sol_min": 13.0,
+          "pred_tst_min": 442.0,
+          "pred_waso_min": 28.0,
+          "pred_se": 0.9020408163265307,
+          "pred_sol_min": 20.0
+        },
+        {
+          "night": "walch/46343/1",
+          "fold": "loso:walch/46343",
+          "n_epochs": 554,
+          "kappa": 0.48560111239182535,
+          "true_tst_min": 234.5,
+          "true_waso_min": 8.5,
+          "true_se": 0.8465703971119134,
+          "true_sol_min": 17.0,
+          "pred_tst_min": 240.0,
+          "pred_waso_min": 9.0,
+          "pred_se": 0.8664259927797834,
+          "pred_sol_min": 15.0
+        },
+        {
+          "night": "walch/5132496/1",
+          "fold": "loso:walch/5132496",
+          "n_epochs": 465,
+          "kappa": 0.26267437484189815,
+          "true_tst_min": 216.0,
+          "true_waso_min": 5.5,
+          "true_se": 0.9290322580645162,
+          "true_sol_min": 11.0,
+          "pred_tst_min": 199.5,
+          "pred_waso_min": 9.5,
+          "pred_se": 0.8580645161290322,
+          "pred_sol_min": 23.5
+        },
+        {
+          "night": "walch/5383425/1",
+          "fold": "loso:walch/5383425",
+          "n_epochs": 976,
+          "kappa": 0.4995522857626873,
+          "true_tst_min": 468.0,
+          "true_waso_min": 10.5,
+          "true_se": 0.9590163934426229,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 419.0,
+          "pred_waso_min": 69.0,
+          "pred_se": 0.8586065573770492,
+          "pred_sol_min": 0.0
+        },
+        {
+          "night": "walch/5498603/1",
+          "fold": "loso:walch/5498603",
+          "n_epochs": 744,
+          "kappa": 0.40507818879059365,
+          "true_tst_min": 318.5,
+          "true_waso_min": 48.5,
+          "true_se": 0.8561827956989247,
+          "true_sol_min": 5.0,
+          "pred_tst_min": 306.5,
+          "pred_waso_min": 35.5,
+          "pred_se": 0.8239247311827957,
+          "pred_sol_min": 30.0
+        },
+        {
+          "night": "walch/5797046/1",
+          "fold": "loso:walch/5797046",
+          "n_epochs": 939,
+          "kappa": 0.5636937223349882,
+          "true_tst_min": 430.0,
+          "true_waso_min": 32.0,
+          "true_se": 0.9158679446219382,
+          "true_sol_min": 7.5,
+          "pred_tst_min": 442.5,
+          "pred_waso_min": 21.5,
+          "pred_se": 0.9424920127795527,
+          "pred_sol_min": 5.5
+        },
+        {
+          "night": "walch/6220552/1",
+          "fold": "loso:walch/6220552",
+          "n_epochs": 955,
+          "kappa": 0.3378159743022504,
+          "true_tst_min": 451.0,
+          "true_waso_min": 16.5,
+          "true_se": 0.9445026178010472,
+          "true_sol_min": 9.5,
+          "pred_tst_min": 384.5,
+          "pred_waso_min": 64.0,
+          "pred_se": 0.8052356020942408,
+          "pred_sol_min": 28.5
+        },
+        {
+          "night": "walch/759667/1",
+          "fold": "loso:walch/759667",
+          "n_epochs": 475,
+          "kappa": 0.45334581579229827,
+          "true_tst_min": 228.5,
+          "true_waso_min": 3.0,
+          "true_se": 0.9621052631578947,
+          "true_sol_min": 6.0,
+          "pred_tst_min": 185.5,
+          "pred_waso_min": 43.5,
+          "pred_se": 0.7810526315789473,
+          "pred_sol_min": 8.5
+        },
+        {
+          "night": "walch/7749105/1",
+          "fold": "loso:walch/7749105",
+          "n_epochs": 203,
+          "kappa": 0.3306826997672614,
+          "true_tst_min": 75.0,
+          "true_waso_min": 1.5,
+          "true_se": 0.7389162561576355,
+          "true_sol_min": 17.5,
+          "pred_tst_min": 83.0,
+          "pred_waso_min": 2.0,
+          "pred_se": 0.8177339901477833,
+          "pred_sol_min": 16.5
+        },
+        {
+          "night": "walch/781756/1",
+          "fold": "loso:walch/781756",
+          "n_epochs": 981,
+          "kappa": 0.4954814746342406,
+          "true_tst_min": 449.0,
+          "true_waso_min": 15.0,
+          "true_se": 0.9153924566768603,
+          "true_sol_min": 26.5,
+          "pred_tst_min": 397.0,
+          "pred_waso_min": 66.0,
+          "pred_se": 0.8093781855249745,
+          "pred_sol_min": 27.5
+        },
+        {
+          "night": "walch/8000685/1",
+          "fold": "loso:walch/8000685",
+          "n_epochs": 957,
+          "kappa": 0.5019796072809898,
+          "true_tst_min": 462.0,
+          "true_waso_min": 8.5,
+          "true_se": 0.9655172413793104,
+          "true_sol_min": 8.0,
+          "pred_tst_min": 438.0,
+          "pred_waso_min": 17.5,
+          "pred_se": 0.9153605015673981,
+          "pred_sol_min": 20.5
+        },
+        {
+          "night": "walch/8173033/1",
+          "fold": "loso:walch/8173033",
+          "n_epochs": 955,
+          "kappa": 0.4973171606315117,
+          "true_tst_min": 463.0,
+          "true_waso_min": 5.5,
+          "true_se": 0.9696335078534032,
+          "true_sol_min": 9.0,
+          "pred_tst_min": 448.5,
+          "pred_waso_min": 14.0,
+          "pred_se": 0.9392670157068063,
+          "pred_sol_min": 15.0
+        },
+        {
+          "night": "walch/8258170/1",
+          "fold": "loso:walch/8258170",
+          "n_epochs": 972,
+          "kappa": 0.5425160055927587,
+          "true_tst_min": 438.5,
+          "true_waso_min": 6.5,
+          "true_se": 0.9022633744855967,
+          "true_sol_min": 41.0,
+          "pred_tst_min": 444.5,
+          "pred_waso_min": 19.0,
+          "pred_se": 0.9146090534979424,
+          "pred_sol_min": 22.5
+        },
+        {
+          "night": "walch/844359/1",
+          "fold": "loso:walch/844359",
+          "n_epochs": 897,
+          "kappa": 0.3334903993403228,
+          "true_tst_min": 402.0,
+          "true_waso_min": 33.5,
+          "true_se": 0.8963210702341137,
+          "true_sol_min": 11.0,
+          "pred_tst_min": 361.0,
+          "pred_waso_min": 62.5,
+          "pred_se": 0.8049052396878483,
+          "pred_sol_min": 23.0
+        },
+        {
+          "night": "walch/8530312/1",
+          "fold": "loso:walch/8530312",
+          "n_epochs": 947,
+          "kappa": 0.5196461330031698,
+          "true_tst_min": 434.5,
+          "true_waso_min": 25.5,
+          "true_se": 0.9176346356916578,
+          "true_sol_min": 13.5,
+          "pred_tst_min": 357.5,
+          "pred_waso_min": 94.0,
+          "pred_se": 0.7550158394931362,
+          "pred_sol_min": 19.0
+        },
+        {
+          "night": "walch/8686948/1",
+          "fold": "loso:walch/8686948",
+          "n_epochs": 955,
+          "kappa": 0.44989944595386505,
+          "true_tst_min": 453.0,
+          "true_waso_min": 9.0,
+          "true_se": 0.9486910994764398,
+          "true_sol_min": 15.5,
+          "pred_tst_min": 439.5,
+          "pred_waso_min": 14.0,
+          "pred_se": 0.9204188481675393,
+          "pred_sol_min": 24.0
+        },
+        {
+          "night": "walch/8692923/1",
+          "fold": "loso:walch/8692923",
+          "n_epochs": 936,
+          "kappa": 0.4320926170777642,
+          "true_tst_min": 413.0,
+          "true_waso_min": 46.0,
+          "true_se": 0.8824786324786325,
+          "true_sol_min": 9.0,
+          "pred_tst_min": 421.0,
+          "pred_waso_min": 31.5,
+          "pred_se": 0.8995726495726496,
+          "pred_sol_min": 15.5
+        },
+        {
+          "night": "walch/9106476/1",
+          "fold": "loso:walch/9106476",
+          "n_epochs": 961,
+          "kappa": 0.19347842705816268,
+          "true_tst_min": 437.0,
+          "true_waso_min": 41.5,
+          "true_se": 0.9094693028095734,
+          "true_sol_min": 2.0,
+          "pred_tst_min": 419.0,
+          "pred_waso_min": 52.0,
+          "pred_se": 0.8720083246618107,
+          "pred_sol_min": 9.5
+        },
+        {
+          "night": "walch/9618981/1",
+          "fold": "loso:walch/9618981",
+          "n_epochs": 945,
+          "kappa": 0.5745159837910851,
+          "true_tst_min": 425.5,
+          "true_waso_min": 40.0,
+          "true_se": 0.9005291005291005,
+          "true_sol_min": 7.0,
+          "pred_tst_min": 419.5,
+          "pred_waso_min": 37.5,
+          "pred_se": 0.8878306878306879,
+          "pred_sol_min": 15.5
+        },
+        {
+          "night": "walch/9961348/1",
+          "fold": "loso:walch/9961348",
+          "n_epochs": 720,
+          "kappa": 0.18221931688184342,
+          "true_tst_min": 324.5,
+          "true_waso_min": 18.0,
+          "true_se": 0.9013888888888889,
+          "true_sol_min": 14.0,
+          "pred_tst_min": 297.5,
+          "pred_waso_min": 41.5,
+          "pred_se": 0.8263888888888888,
+          "pred_sol_min": 13.5
+        }
+      ],
+      "seconds": 3251.502881666999
+    }
+  ]
+}

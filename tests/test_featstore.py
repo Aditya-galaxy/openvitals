@@ -60,3 +60,25 @@ def test_version_mismatch_is_refused(walch_dir, tmp_path, monkeypatch):
     monkeypatch.setattr(features, "FEATURE_VERSION", features.FEATURE_VERSION + 1)
     with pytest.raises(ValueError, match="re-featurize"):
         featstore.load_dataset(feat, "walch")
+
+
+def test_streaming_redoes_subjects_saved_without_motion(walch_root, tmp_path, monkeypatch):
+    """An HR-only feature file must not block a later download that has motion."""
+    rels = sorted(str(p.relative_to(walch_root)) for p in walch_root.rglob("*") if p.is_file())
+    monkeypatch.setattr(download, "manifest", lambda name, dest, refresh=True: [("x", r) for r in rels])
+
+    def fake_fetch(name, dest, paths=None, **kw):
+        for rel in paths:
+            (dest / name / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(walch_root / rel, dest / name / rel)
+
+    monkeypatch.setattr(download, "download", fake_fetch)
+    feat = tmp_path / "feat"
+    hr_only = datasets.load("walch", walch_root, subjects=["1000"])
+    hr_only[0].motion = np.empty((0, 4))
+    featstore.save_subject(feat, "walch", "1000", hr_only)
+    assert not featstore.has_motion(featstore.subject_path(feat, "walch", "1000"))
+
+    done = featstore.featurize("walch", tmp_path / "data", feat, download=True, log=lambda m: None)
+    assert "1000" in done and len(done) == 8
+    assert featstore.has_motion(featstore.subject_path(feat, "walch", "1000"))

@@ -24,7 +24,10 @@ seq = [
 openvitals = "openvitals.cli:main"
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = [
+    "ipykernel>=7.3.0",
+    "pytest>=8",
+]
 
 [build-system]
 requires = ["hatchling"]

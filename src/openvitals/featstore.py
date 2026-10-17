@@ -57,6 +57,15 @@ def done_subjects(root: Path, dataset: str) -> set[str]:
     return {p.stem for p in (Path(root) / dataset).glob("*.pkl")}
 
 
+def has_motion(path: Path) -> bool:
+    """Whether a saved subject was featurized with motion data."""
+    return any(features.extract(n, "motion").motion_cov.any() for n in load_subject(path))
+
+
+def _has_motion_files(rels: list[str]) -> bool:
+    return any("motion" in rel for rel in rels)
+
+
 def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False, evict: bool = False,
               subjects: list[str] | None = None, workers: int = 8, log=print) -> list[str]:
     """Featurize a dataset one subject at a time, resumably.
@@ -81,7 +90,13 @@ def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False
         all_subjects = sorted(by_subject)
     else:
         all_subjects = mod.subject_ids(root)
-    todo = [s for s in (subjects or all_subjects) if s not in done_subjects(feat_root, name)]
+    done = done_subjects(feat_root, name)
+    if download:
+        # A subject featurized without motion (e.g. an HR-only local copy) is not
+        # done if motion is available to download: redo it.
+        done = {s for s in done if not _has_motion_files(by_subject.get(s, []))
+                or has_motion(subject_path(feat_root, name, s))}
+    todo = [s for s in (subjects or all_subjects) if s not in done]
     log(f"{name}: {len(all_subjects) - len(todo)} of {len(all_subjects)} subjects already featurized")
     finished = []
     for i, sid in enumerate(todo, 1):
