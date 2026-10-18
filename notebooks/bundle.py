@@ -30,7 +30,7 @@ def main() -> None:
     nb["cells"].insert(1, {
         "cell_type": "code", "metadata": {}, "execution_count": None, "outputs": [],
         "source": [f"# Embedded by notebooks/bundle.py from commit {commit}. Don't edit.\n",
-                   f"WHEEL_NAME = {name!r}\n", f"WHEEL_B64 = {b64!r}\n"],
+                   f"WHEEL_NAME = {name!r}\n", f"WHEEL_COMMIT = {commit!r}\n", f"WHEEL_B64 = {b64!r}\n"],
     })
     OUT.write_text(json.dumps(nb, indent=1))
     print(f"wrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size / 1024:.0f} KB, {name}, commit {commit})",
