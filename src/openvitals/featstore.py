@@ -67,7 +67,7 @@ def _has_motion_files(rels: list[str]) -> bool:
 
 
 def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False, evict: bool = False,
-              subjects: list[str] | None = None, workers: int = 8, log=print) -> list[str]:
+              subjects: list[str] | None = None, workers: int = 4, log=print) -> list[str]:
     """Featurize a dataset one subject at a time, resumably.
 
     Subjects that already have a feature file are skipped. With download=True

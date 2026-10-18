@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import fnmatch
 import hashlib
+import http.client
 import sys
 import time
 import urllib.error
@@ -28,7 +29,7 @@ def manifest(name: str, dest: Path, refresh: bool = True) -> list[tuple[str, str
 
 
 def download(name: str, dest: Path, include: str | None = None, dry_run: bool = False,
-             workers: int = 8, paths: list[str] | None = None, refresh_manifest: bool = True,
+             workers: int = 4, paths: list[str] | None = None, refresh_manifest: bool = True,
              quiet_if_done: bool = False) -> Path:
     """include: comma-separated globs; paths: exact relative paths. Either narrows the download."""
     base = REGISTRY[name].URL
@@ -52,34 +53,71 @@ def download(name: str, dest: Path, include: str | None = None, dry_run: bool = 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futures = {pool.submit(_fetch_any, sources, rel, dest / rel, digest): rel for digest, rel in todo}
         for i, fut in enumerate(as_completed(futures), 1):
-            fut.result()
-            print(f"[{i}/{len(todo)}] {futures[fut]}", file=sys.stderr, flush=True)
+            got, secs = fut.result()
+            print(f"[{i}/{len(todo)}] {futures[fut]}  {got / 1e6:.1f} MB at {got / 1e6 / max(secs, 1e-3):.2f} MB/s",
+                  file=sys.stderr, flush=True)
     return dest
 
 
-def _fetch_any(sources: list[str], rel: str, target: Path, digest: str, attempts: int = 4) -> None:
-    """Try each source in turn, retrying transient failures (PhysioNet returns
-    occasional 502s) with exponential backoff."""
+# A read that stalls this long counts as a failure and is retried. Without a timeout
+# a server that stops sending without closing the connection hangs the download
+# forever, which is how PhysioNet behaves under load.
+READ_TIMEOUT = 60
+ATTEMPTS = 8
+
+
+def _fetch_any(sources: list[str], rel: str, target: Path, digest: str,
+               attempts: int = ATTEMPTS, timeout: float = READ_TIMEOUT) -> tuple[int, float]:
+    """Try each source in turn, retrying failures and stalls with exponential
+    backoff (capped at 60 s). Partial files are kept between attempts and resumed."""
+    err: Exception | None = None
     for attempt in range(attempts):
         for base in sources:
             try:
-                return _fetch(base + rel, target, digest)
-            except (OSError, urllib.error.URLError) as e:
+                return _fetch(base + rel, target, digest, timeout)
+            except (OSError, urllib.error.URLError, http.client.HTTPException) as e:  # timeouts, drops
                 err = e
-        time.sleep(2 ** attempt)
-    raise err
+        time.sleep(min(2 ** attempt, 60))
+    raise IOError(f"{rel}: gave up after {attempts} attempts: {err}") from err
 
 
-def _fetch(url: str, target: Path, digest: str) -> None:
+def _fetch(url: str, target: Path, digest: str, timeout: float = READ_TIMEOUT) -> tuple[int, float]:
+    """Download to <target>.part, resuming a partial file with an HTTP Range request,
+    then verify the checksum. Returns (bytes this call fetched, seconds)."""
     target.parent.mkdir(parents=True, exist_ok=True)
     tmp = target.with_suffix(target.suffix + ".part")
-    with urllib.request.urlopen(_req(url)) as r, open(tmp, "wb") as f:
-        while chunk := r.read(1 << 20):
-            f.write(chunk)
+    have = tmp.stat().st_size if tmp.exists() else 0
+    req = _req(url)
+    if have:
+        req.add_header("Range", f"bytes={have}-")
+    t0, got = time.perf_counter(), 0
+    try:
+        r = urllib.request.urlopen(req, timeout=timeout)
+    except urllib.error.HTTPError as e:
+        if e.code == 416 and have:  # range past the end: the partial file is already complete
+            r = None
+        else:
+            raise
+    if r is not None:
+        with r:
+            resumed = have and r.status == 206
+            with open(tmp, "ab" if resumed else "wb") as f:
+                try:
+                    while chunk := r.read(1 << 16):
+                        f.write(chunk)
+                        got += len(chunk)
+                except http.client.IncompleteRead as e:  # connection dropped mid-chunk:
+                    f.write(e.partial)                    # keep what arrived, resume from there
+                    raise
+            # read(n) returns b"" when the server closes early instead of raising, so check
+            # the bytes still owed; the partial file stays for the next attempt to resume.
+            if r.length:
+                raise http.client.IncompleteRead(b"", r.length)
     if _sha256(tmp) != digest:
-        tmp.unlink()
+        tmp.unlink()  # corrupt or stale partial: start clean next attempt
         raise IOError(f"checksum mismatch for {target.name}")
     tmp.replace(target)
+    return got, time.perf_counter() - t0
 
 
 def _req(url: str) -> urllib.request.Request:
@@ -87,7 +125,7 @@ def _req(url: str) -> urllib.request.Request:
 
 
 def _get(url: str) -> bytes:
-    with urllib.request.urlopen(_req(url)) as r:
+    with urllib.request.urlopen(_req(url), timeout=READ_TIMEOUT) as r:
         return r.read()
 
 

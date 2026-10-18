@@ -74,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--download", action="store_true", help="fetch each subject's raw files just before use")
     f.add_argument("--evict", action="store_true", help="delete each subject's raw files after featurizing")
     f.add_argument("--subjects", help="comma-separated subset")
-    f.add_argument("--workers", type=int, default=8)
+    f.add_argument("--workers", type=int, default=4, help="parallel downloads per subject; keep low for PhysioNet")
 
     a = p.parse_args(argv)
     if a.cmd == "merge":
