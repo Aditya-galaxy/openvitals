@@ -75,6 +75,7 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--evict", action="store_true", help="delete each subject's raw files after featurizing")
     f.add_argument("--subjects", help="comma-separated subset")
     f.add_argument("--workers", type=int, default=4, help="parallel downloads per subject; keep low for PhysioNet")
+    f.add_argument("--max-nights", type=int, help="keep each subject's first N nights (multi-night datasets)")
 
     a = p.parse_args(argv)
     if a.cmd == "merge":
@@ -88,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "featurize":
         subjects = [s for s in (a.subjects or "").split(",") if s] or None
         featstore.featurize(a.dataset, a.data_dir, a.features, a.download, a.evict, subjects, a.workers,
-                            log=lambda m: print(m, flush=True))
+                            log=lambda m: print(m, flush=True), max_nights=a.max_nights)
         return 0
     if a.cmd == "export":
         model = models.make(a.model).fit(_load_all(a.data, a.cache), a.scheme)

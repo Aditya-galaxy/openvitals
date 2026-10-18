@@ -67,12 +67,15 @@ def _has_motion_files(rels: list[str]) -> bool:
 
 
 def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False, evict: bool = False,
-              subjects: list[str] | None = None, workers: int = 4, log=print) -> list[str]:
+              subjects: list[str] | None = None, workers: int = 4, log=print,
+              max_nights: int | None = None) -> list[str]:
     """Featurize a dataset one subject at a time, resumably.
 
     Subjects that already have a feature file are skipped. With download=True
     each subject's raw files are fetched (checksum-verified) just before use;
     with evict=True they are deleted right after, so peak disk is one subject.
+    max_nights keeps each subject's first N nights (chronological), which cuts
+    the download for multi-night datasets; subjects stay the evaluation unit.
     Returns the subjects featurized in this call.
     """
     from . import datasets
@@ -88,6 +91,9 @@ def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False
             if sid:
                 by_subject.setdefault(sid, []).append(rel)
         all_subjects = sorted(by_subject)
+        everything = {sid: list(rels) for sid, rels in by_subject.items()}  # for eviction
+        if max_nights:
+            by_subject = {sid: _first_nights(mod, rels, max_nights) for sid, rels in by_subject.items()}
     else:
         all_subjects = mod.subject_ids(root)
     done = done_subjects(feat_root, name)
@@ -104,10 +110,24 @@ def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False
             fetch(name, data_dir, paths=by_subject[sid], workers=workers,
                   refresh_manifest=False, quiet_if_done=True)
         nights = mod.load(root, cache_dir=None, subjects=[sid])
+        if max_nights:
+            nights = sorted(nights, key=lambda n: _night_order(n.night_id))[:max_nights]
         save_subject(feat_root, name, sid, nights)
         if evict and download:
-            for rel in by_subject[sid]:
+            for rel in everything[sid]:  # also leftovers from earlier runs
                 (root / rel).unlink(missing_ok=True)
         finished.append(sid)
         log(f"[{i}/{len(todo)}] {name}/{sid}: {len(nights)} nights")
     return finished
+
+
+def _night_order(night_id: str):
+    return (0, int(night_id)) if str(night_id).isdigit() else (1, str(night_id))
+
+
+def _first_nights(mod, rels: list[str], n: int) -> list[str]:
+    night_of = getattr(mod, "manifest_night", None)
+    if night_of is None:  # one night per subject (e.g. Walch)
+        return rels
+    keep = set(sorted({night_of(r) for r in rels if night_of(r)}, key=_night_order)[:n])
+    return [r for r in rels if night_of(r) in keep]

@@ -43,6 +43,12 @@ def manifest_subject(rel: str) -> str | None:
     return head if head.startswith("Bidslab") and "/" in rel else None
 
 
+def manifest_night(rel: str) -> str | None:
+    """Night folder a dataset file belongs to (Bidslab00/<night>/file)."""
+    parts = rel.split("/")
+    return parts[1] if len(parts) >= 3 else None
+
+
 def subject_ids(root: Path) -> list[str]:
     return sorted({d.parent.name for d in night_dirs(root)})
 

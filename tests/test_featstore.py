@@ -82,3 +82,29 @@ def test_streaming_redoes_subjects_saved_without_motion(walch_root, tmp_path, mo
     done = featstore.featurize("walch", tmp_path / "data", feat, download=True, log=lambda m: None)
     assert "1000" in done and len(done) == 8
     assert featstore.has_motion(featstore.subject_path(feat, "walch", "1000"))
+
+
+def test_max_nights_fetches_and_keeps_first_nights(bidsleep_root, tmp_path, monkeypatch):
+    rels = sorted(str(p.relative_to(bidsleep_root)) for p in bidsleep_root.rglob("*") if p.is_file())
+    monkeypatch.setattr(download, "manifest", lambda name, dest, refresh=True: [("x", r) for r in rels])
+    fetched = []
+
+    def fake_fetch(name, dest, paths=None, **kw):
+        for rel in paths:
+            (dest / name / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(bidsleep_root / rel, dest / name / rel)
+        fetched.extend(paths)
+
+    monkeypatch.setattr(download, "download", fake_fetch)
+    data, feat = tmp_path / "data", tmp_path / "feat"
+    leftover = data / "bidsleep" / "Bidslab00" / "2" / "motion.csv"  # from an earlier, interrupted run
+    leftover.parent.mkdir(parents=True)
+    shutil.copy(bidsleep_root / "Bidslab00" / "2" / "motion.csv", leftover)
+
+    done = featstore.featurize("bidsleep", data, feat, download=True, evict=True, max_nights=1, log=lambda m: None)
+    assert len(done) == 6
+    assert all(r.split("/")[1] == "1" for r in fetched) and len(fetched) == 6 * 3
+    nights = featstore.load_dataset(feat, "bidsleep")
+    assert len(nights) == 6 and {n.night_id for n in nights} == {"1"}
+    assert all(featstore.has_motion(featstore.subject_path(feat, "bidsleep", s)) for s in done)
+    assert not any(p.is_file() for p in (data / "bidsleep").rglob("*") if p.name != "SHA256SUMS.txt")
