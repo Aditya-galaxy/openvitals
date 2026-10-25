@@ -5,7 +5,7 @@
 # Optional: MODELS=a,b  SKIP_FEATURIZE=1  JOBS=n  POWEROFF=0
 set -uo pipefail
 cd "$HOME/ov"
-: "${BUCKET:?set BUCKET}" "${MAX_NIGHTS:=1}" "${SEEDS:=0 1 2 3 4}" "${JOBS:=$(nproc)}" "${POWEROFF:=1}"
+: "${BUCKET:?set BUCKET}" "${MAX_NIGHTS:=1}" "${WORKERS:=4}" "${SEEDS:=0 1 2 3 4}" "${JOBS:=$(nproc)}" "${POWEROFF:=1}"
 export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
 OV=.venv/bin/openvitals
 mkdir -p logs results/parts
@@ -17,9 +17,24 @@ SYNC=$!
 sync_now() { gsutil -q -m rsync -r feat "$BUCKET/feat"; gsutil -q -m rsync -r results "$BUCKET/results"; gsutil -q -m rsync -r logs "$BUCKET/logs"; }
 
 if [ "${SKIP_FEATURIZE:-0}" = 1 ]; then rc=0; else
-  log "featurize bidsleep (max_nights=$MAX_NIGHTS)"
-  $OV featurize bidsleep --data-dir data --features feat --download --evict --workers 4 --max-nights "$MAX_NIGHTS" >> logs/featurize.log 2>&1
-  rc=$?; log "featurize exit $rc"; sync_now
+  # PhysioNet throttles each connection (~25 KB/s), and with few nights per subject one
+  # big motion.csv dominates each subject, so parallelism has to be *across* subjects:
+  # WORKERS featurize processes on disjoint subject lists, one shared feature store.
+  log "featurize bidsleep (max_nights=$MAX_NIGHTS, $WORKERS subjects in parallel)"
+  mkdir -p data/bidsleep
+  [ -s data/bidsleep/SHA256SUMS.txt ] || curl -sf --retry 5 -o data/bidsleep/SHA256SUMS.txt \
+    https://physionet.org/files/bidsleep-dataset/1.0.1/SHA256SUMS.txt
+  mapfile -t SUBJ < <(grep -o 'Bidslab[0-9]*' data/bidsleep/SHA256SUMS.txt | sort -u)
+  for ((g = 0; g < WORKERS; g++)); do
+    list=""; for ((i = g; i < ${#SUBJ[@]}; i += WORKERS)); do list+="${SUBJ[i]},"; done
+    [ -n "$list" ] && $OV featurize bidsleep --data-dir data --features feat --download --evict --workers 3 \
+      --max-nights "$MAX_NIGHTS" --subjects "${list%,}" >> "logs/featurize-$g.log" 2>&1 &
+  done
+  wait
+  # Final pass over every subject retries anything a worker failed on, and sets rc.
+  $OV featurize bidsleep --data-dir data --features feat --download --evict --workers 3 \
+    --max-nights "$MAX_NIGHTS" >> logs/featurize.log 2>&1
+  rc=$?; log "featurize exit $rc ($(ls feat/bidsleep 2>/dev/null | wc -l) subjects)"; sync_now
 fi
 [ $rc -eq 0 ] || { log "featurize failed; not benchmarking"; kill $SYNC; exit $rc; }
 
