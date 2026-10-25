@@ -83,6 +83,18 @@ resumes after interruption. [`notebooks/full_benchmark.ipynb`](notebooks/full_be
 runs this on Colab with the feature store on Google Drive. Use it for full BIDSleep
 when PhysioNet is slow from your network.
 
+### Full BIDSleep on Google Cloud
+
+```bash
+cloud/gcp/launch.sh        # bucket + e2-standard-8 VM in us-east1, wheel + Walch features copied, deps installed
+gcloud compute ssh openvitals-run --zone us-east1-b --command \
+  "cd ov && BUCKET=gs://kronagent-openvitals MAX_NIGHTS=1 tmux new -d -s run 'bash run.sh'"
+```
+
+`run.sh` featurizes BIDSleep (streamed and resumable), then runs 5-seed benchmarks in parallel and
+merges them. It syncs features, results and logs to the bucket every 10 min, then powers the VM off.
+Re-running it skips finished subjects and reports.
+
 Schemes: `2class` (wake/sleep), `3class` (wake/NREM/REM), `4class` (wake/light/deep/REM).
 
 ## Baselines
