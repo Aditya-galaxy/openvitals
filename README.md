@@ -93,7 +93,9 @@ gcloud compute ssh openvitals-run --zone us-east1-b --command \
 
 `run.sh` featurizes BIDSleep (streamed and resumable), then runs 5-seed benchmarks in parallel and
 merges them. It syncs features, results and logs to the bucket every 10 min, then powers the VM off.
-Re-running it skips finished subjects and reports.
+Re-running it skips finished subjects and reports. To deploy a new wheel mid-run, copy it to
+`~/ov/` on the VM and run `BUCKET=... bash ov/restart.sh`; partial downloads resume. Download
+workers share one queue (`featurize --claim`), so none sits idle while subjects remain.
 
 Schemes: `2class` (wake/sleep), `3class` (wake/NREM/REM), `4class` (wake/light/deep/REM).
 
