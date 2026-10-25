@@ -24,11 +24,13 @@ if [ "${SKIP_FEATURIZE:-0}" = 1 ]; then rc=0; else
   mkdir -p data/bidsleep
   [ -s data/bidsleep/SHA256SUMS.txt ] || curl -sf --retry 5 -o data/bidsleep/SHA256SUMS.txt \
     https://physionet.org/files/bidsleep-dataset/1.0.1/SHA256SUMS.txt
-  mapfile -t SUBJ < <(grep -o 'Bidslab[0-9]*' data/bidsleep/SHA256SUMS.txt | sort -u)
+  # Shared queue: every worker gets the full list and claims subjects one at a time,
+  # so none sits idle while another still has a backlog (fixed lists left one worker
+  # with 5 subjects while another had finished).
+  .venv/bin/python -c "from openvitals import featstore; featstore.clear_claims('feat', 'bidsleep')"  # stale, from a killed run
   for ((g = 0; g < WORKERS; g++)); do
-    list=""; for ((i = g; i < ${#SUBJ[@]}; i += WORKERS)); do list+="${SUBJ[i]},"; done
-    [ -n "$list" ] && $OV featurize bidsleep --data-dir data --features feat --download --evict --workers 3 \
-      --max-nights "$MAX_NIGHTS" --subjects "${list%,}" >> "logs/featurize-$g.log" 2>&1 &
+    $OV featurize bidsleep --data-dir data --features feat --download --evict --workers 3 \
+      --max-nights "$MAX_NIGHTS" --claim >> "logs/featurize-$g.log" 2>&1 &
   done
   wait
   # Final pass over every subject retries anything a worker failed on, and sets rc.

@@ -76,6 +76,8 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--subjects", help="comma-separated subset")
     f.add_argument("--workers", type=int, default=4, help="parallel downloads per subject; keep low for PhysioNet")
     f.add_argument("--max-nights", type=int, help="keep each subject's first N nights (multi-night datasets)")
+    f.add_argument("--claim", action="store_true", help="share the feature store as a work queue with other processes")
+    f.add_argument("--clear-claims", action="store_true", help="remove stale claims first (no other process running)")
 
     a = p.parse_args(argv)
     if a.cmd == "merge":
@@ -88,8 +90,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "featurize":
         subjects = [s for s in (a.subjects or "").split(",") if s] or None
+        if a.clear_claims:
+            featstore.clear_claims(a.features, a.dataset)
         featstore.featurize(a.dataset, a.data_dir, a.features, a.download, a.evict, subjects, a.workers,
-                            log=lambda m: print(m, flush=True), max_nights=a.max_nights)
+                            log=lambda m: print(m, flush=True), max_nights=a.max_nights, claim=a.claim)
         return 0
     if a.cmd == "export":
         model = models.make(a.model).fit(_load_all(a.data, a.cache), a.scheme)

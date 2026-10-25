@@ -10,6 +10,7 @@ data. Files are pickles written by this package; only load ones you made.
 
 from __future__ import annotations
 
+import os
 import pickle
 from pathlib import Path
 
@@ -68,7 +69,7 @@ def _has_motion_files(rels: list[str]) -> bool:
 
 def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False, evict: bool = False,
               subjects: list[str] | None = None, workers: int = 4, log=print,
-              max_nights: int | None = None) -> list[str]:
+              max_nights: int | None = None, claim: bool = False) -> list[str]:
     """Featurize a dataset one subject at a time, resumably.
 
     Subjects that already have a feature file are skipped. With download=True
@@ -77,7 +78,10 @@ def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False
     max_nights keeps each subject's first N nights (chronological), which cuts
     the download for multi-night datasets; subjects stay the evaluation unit.
     A subject whose download fails is skipped and reported at the end (IOError),
-    after the others are done. Returns the subjects featurized in this call.
+    after the others are done. With claim=True several processes can share one
+    feature store as a work queue: each subject is taken by whichever process
+    first creates its claim file, so all stay busy until the list is empty.
+    Returns the subjects featurized in this call.
     """
     from . import datasets
     from .download import download as fetch
@@ -104,30 +108,73 @@ def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False
         done = {s for s in done if not _has_motion_files(by_subject.get(s, []))
                 or has_motion(subject_path(feat_root, name, s))}
     todo = [s for s in (subjects or all_subjects) if s not in done]
+    if download:  # subjects with raw or partial files already on disk first, so they resume now
+        started = lambda sid: any((root / r).exists() or (root / f"{r}.part").exists()  # noqa: E731
+                                  for r in by_subject.get(sid, []))
+        todo.sort(key=lambda sid: not started(sid))
     log(f"{name}: {len(all_subjects) - len(todo)} of {len(all_subjects)} subjects already featurized")
     finished, failed = [], []
     for i, sid in enumerate(todo, 1):
-        if download:
-            try:
-                fetch(name, data_dir, paths=by_subject[sid], workers=workers,
-                      refresh_manifest=False, quiet_if_done=True)
-            except OSError as e:  # one unreachable subject shouldn't stop the rest
-                failed.append(sid)
-                log(f"[{i}/{len(todo)}] {name}/{sid}: FAILED download, skipping for now: {e}")
-                continue
-        nights = mod.load(root, cache_dir=None, subjects=[sid])
-        if max_nights:
-            nights = sorted(nights, key=lambda n: _night_order(n.night_id))[:max_nights]
-        save_subject(feat_root, name, sid, nights)
-        if evict and download:
-            for rel in everything[sid]:  # also leftovers from earlier runs
-                (root / rel).unlink(missing_ok=True)
-        finished.append(sid)
-        log(f"[{i}/{len(todo)}] {name}/{sid}: {len(nights)} nights")
+        if claim:
+            if subject_path(feat_root, name, sid).exists() and (
+                    not download or not _has_motion_files(by_subject.get(sid, []))
+                    or has_motion(subject_path(feat_root, name, sid))):
+                continue  # another process finished it since we started
+            if not _claim(feat_root, name, sid):
+                continue  # another process is on it
+        try:
+            if download:
+                try:
+                    fetch(name, data_dir, paths=by_subject[sid], workers=workers,
+                          refresh_manifest=False, quiet_if_done=True)
+                except OSError as e:  # one unreachable subject shouldn't stop the rest
+                    failed.append(sid)
+                    log(f"[{i}/{len(todo)}] {name}/{sid}: FAILED download, skipping for now: {e}")
+                    continue
+            nights = mod.load(root, cache_dir=None, subjects=[sid])
+            if max_nights:
+                nights = sorted(nights, key=lambda n: _night_order(n.night_id))[:max_nights]
+            save_subject(feat_root, name, sid, nights)
+            if evict and download:
+                for rel in everything[sid]:  # also leftovers from earlier runs
+                    (root / rel).unlink(missing_ok=True)
+            finished.append(sid)
+            log(f"[{i}/{len(todo)}] {name}/{sid}: {len(nights)} nights")
+        finally:
+            if claim:
+                _release(feat_root, name, sid)
     if failed:
         # Partial downloads are kept, so a re-run resumes them.
         raise IOError(f"{len(failed)} subject(s) failed to download: {', '.join(failed)}")
     return finished
+
+
+def claims_dir(root: Path, dataset: str) -> Path:
+    return Path(root) / dataset / ".claims"
+
+
+def clear_claims(root: Path, dataset: str) -> None:
+    """Remove stale claims, e.g. left by processes killed mid-subject."""
+    d = claims_dir(root, dataset)
+    if d.is_dir():
+        for p in d.iterdir():
+            p.unlink(missing_ok=True)
+
+
+def _claim(root: Path, dataset: str, sid: str) -> bool:
+    d = claims_dir(root, dataset)
+    d.mkdir(parents=True, exist_ok=True)
+    try:
+        fd = os.open(d / sid, os.O_CREAT | os.O_EXCL | os.O_WRONLY)  # atomic: one winner
+    except FileExistsError:
+        return False
+    os.write(fd, str(os.getpid()).encode())
+    os.close(fd)
+    return True
+
+
+def _release(root: Path, dataset: str, sid: str) -> None:
+    (claims_dir(root, dataset) / sid).unlink(missing_ok=True)
 
 
 def _night_order(night_id: str):

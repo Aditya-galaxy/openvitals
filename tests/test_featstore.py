@@ -127,3 +127,47 @@ def test_failed_subject_is_skipped_and_reported(walch_root, tmp_path, monkeypatc
         featstore.featurize("walch", tmp_path / "data", feat, download=True, log=logs.append)
     assert featstore.done_subjects(feat, "walch") == {str(1000 + i) for i in range(8)} - {"1003"}
     assert any("1003: FAILED download" in line for line in logs)
+
+
+def test_claim_mode_workers_share_the_queue(walch_root, tmp_path, monkeypatch):
+    import threading
+    import time
+    from collections import Counter
+
+    rels = sorted(str(p.relative_to(walch_root)) for p in walch_root.rglob("*") if p.is_file())
+    monkeypatch.setattr(download, "manifest", lambda name, dest, refresh=True: [("x", r) for r in rels])
+    fetched, who, lock = Counter(), {}, threading.Lock()
+
+    def fake_fetch(name, dest, paths=None, **kw):
+        sid = paths[0].split("/")[-1].split("_")[0]
+        with lock:
+            fetched[sid] += 1
+            who[sid] = threading.current_thread().name
+        time.sleep(0.2)  # slow download, so workers overlap
+        for rel in paths:
+            (dest / name / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(walch_root / rel, dest / name / rel)
+
+    monkeypatch.setattr(download, "download", fake_fetch)
+    feat = tmp_path / "feat"
+    threads = [threading.Thread(name=f"w{i}", target=featstore.featurize,
+                                args=("walch", tmp_path / f"data{i}", feat),
+                                kwargs=dict(download=True, claim=True, log=lambda m: None)) for i in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert set(fetched) == {str(1000 + i) for i in range(8)}
+    assert all(n == 1 for n in fetched.values())          # no subject downloaded twice
+    assert len(set(who.values())) > 1                      # work actually spread across workers
+    assert len(featstore.load_dataset(feat, "walch")) == 8
+    assert not any(featstore.claims_dir(feat, "walch").iterdir())  # claims released
+
+
+def test_stale_claim_blocks_until_cleared(walch_dir, tmp_path):
+    feat = tmp_path / "feat"
+    assert featstore._claim(feat, "walch", "1002")          # left by a killed process
+    done = featstore.featurize("walch", walch_dir.parent, feat, claim=True, log=lambda m: None)
+    assert "1002" not in done and len(done) == 7
+    featstore.clear_claims(feat, "walch")
+    assert featstore.featurize("walch", walch_dir.parent, feat, claim=True, log=lambda m: None) == ["1002"]
