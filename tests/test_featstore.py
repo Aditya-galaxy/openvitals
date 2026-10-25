@@ -108,3 +108,22 @@ def test_max_nights_fetches_and_keeps_first_nights(bidsleep_root, tmp_path, monk
     assert len(nights) == 6 and {n.night_id for n in nights} == {"1"}
     assert all(featstore.has_motion(featstore.subject_path(feat, "bidsleep", s)) for s in done)
     assert not any(p.is_file() for p in (data / "bidsleep").rglob("*") if p.name != "SHA256SUMS.txt")
+
+
+def test_failed_subject_is_skipped_and_reported(walch_root, tmp_path, monkeypatch):
+    rels = sorted(str(p.relative_to(walch_root)) for p in walch_root.rglob("*") if p.is_file())
+    monkeypatch.setattr(download, "manifest", lambda name, dest, refresh=True: [("x", r) for r in rels])
+
+    def fake_fetch(name, dest, paths=None, **kw):
+        if any(p.split("/")[-1].startswith("1003_") for p in paths):
+            raise OSError("motion.csv: gave up after 12 attempts in a row without progress")
+        for rel in paths:
+            (dest / name / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(walch_root / rel, dest / name / rel)
+
+    monkeypatch.setattr(download, "download", fake_fetch)
+    feat, logs = tmp_path / "feat", []
+    with pytest.raises(IOError, match="1 subject\\(s\\) failed to download: 1003"):
+        featstore.featurize("walch", tmp_path / "data", feat, download=True, log=logs.append)
+    assert featstore.done_subjects(feat, "walch") == {str(1000 + i) for i in range(8)} - {"1003"}
+    assert any("1003: FAILED download" in line for line in logs)

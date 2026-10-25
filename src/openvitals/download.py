@@ -63,7 +63,10 @@ def download(name: str, dest: Path, include: str | None = None, dry_run: bool = 
 # a server that stops sending without closing the connection hangs the download
 # forever, which is how PhysioNet behaves under load.
 READ_TIMEOUT = 60
-ATTEMPTS = 8
+# Give up on a file only after this many attempts *in a row* that added no bytes.
+# Any attempt that grows the partial file resets the count, so a throttled but
+# moving download keeps going however many stalls it takes.
+ATTEMPTS = 12
 
 
 def _fetch_any(sources: list[str], rel: str, target: Path, digest: str,
@@ -71,14 +74,25 @@ def _fetch_any(sources: list[str], rel: str, target: Path, digest: str,
     """Try each source in turn, retrying failures and stalls with exponential
     backoff (capped at 60 s). Partial files are kept between attempts and resumed."""
     err: Exception | None = None
-    for attempt in range(attempts):
+    tmp = target.with_suffix(target.suffix + ".part")
+    size = lambda: tmp.stat().st_size if tmp.exists() else 0  # noqa: E731
+    fetched, t0, idle = 0, time.perf_counter(), 0
+    while idle < attempts:
+        before = size()
         for base in sources:
             try:
-                return _fetch(base + rel, target, digest, timeout)
+                got, _ = _fetch(base + rel, target, digest, timeout)
+                return fetched + got, time.perf_counter() - t0
             except (OSError, urllib.error.URLError, http.client.HTTPException) as e:  # timeouts, drops
                 err = e
-        time.sleep(min(2 ** attempt, 60))
-    raise IOError(f"{rel}: gave up after {attempts} attempts: {err}") from err
+        grew = size() - before
+        if grew > 0:
+            fetched += grew
+            idle = 0
+        else:
+            idle += 1
+            time.sleep(min(2 ** idle, 60))
+    raise IOError(f"{rel}: gave up after {attempts} attempts in a row without progress: {err}") from err
 
 
 def _fetch(url: str, target: Path, digest: str, timeout: float = READ_TIMEOUT) -> tuple[int, float]:

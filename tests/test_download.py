@@ -37,6 +37,8 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(body[:half]); self.wfile.flush(); time.sleep(3); return
         if mode == "drop":       # send half, then close
             self.wfile.write(body[:half]); self.wfile.flush(); return
+        if "trickle" in self.path:  # every request: send ~1/10 of the file, then go silent
+            self.wfile.write(body[: len(DATA) // 10]); self.wfile.flush(); time.sleep(3); return
         self.wfile.write(body)
 
 
@@ -60,7 +62,7 @@ def test_stalled_read_times_out_and_resumes(server, tmp_path):
     assert (tmp_path / "f").read_bytes() == DATA
     r = _ranges("/stall.bin")
     assert len(r) == 2 and r[0] is None and r[1].startswith("bytes=") and r[1] != "bytes=0-"
-    assert got < len(DATA)  # the second request only fetched the missing half
+    assert got == len(DATA)  # stalled half + resumed half: nothing downloaded twice
 
 
 def test_dropped_connection_resumes(server, tmp_path):
@@ -88,3 +90,12 @@ def test_complete_partial_and_corrupt_partial(server, tmp_path):
 def test_gives_up_with_clear_error(server, tmp_path):
     with pytest.raises(IOError, match="gave up after 3 attempts"):
         download._fetch_any([server + "/"], "x.bin", tmp_path / "x", "0" * 64, attempts=3, timeout=5)
+
+
+def test_keeps_retrying_while_making_progress(server, tmp_path):
+    """Stalls on every request but adds bytes each time: needs ~10 attempts with only
+    3 allowed *in a row without progress*, so it must still finish."""
+    got, _ = download._fetch_any([server + "/"], "trickle.bin", tmp_path / "f", DIGEST, attempts=3, timeout=0.5)
+    assert (tmp_path / "f").read_bytes() == DATA
+    assert len(_ranges("/trickle.bin")) >= 10
+    assert got == len(DATA)

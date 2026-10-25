@@ -76,7 +76,8 @@ def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False
     with evict=True they are deleted right after, so peak disk is one subject.
     max_nights keeps each subject's first N nights (chronological), which cuts
     the download for multi-night datasets; subjects stay the evaluation unit.
-    Returns the subjects featurized in this call.
+    A subject whose download fails is skipped and reported at the end (IOError),
+    after the others are done. Returns the subjects featurized in this call.
     """
     from . import datasets
     from .download import download as fetch
@@ -104,11 +105,16 @@ def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False
                 or has_motion(subject_path(feat_root, name, s))}
     todo = [s for s in (subjects or all_subjects) if s not in done]
     log(f"{name}: {len(all_subjects) - len(todo)} of {len(all_subjects)} subjects already featurized")
-    finished = []
+    finished, failed = [], []
     for i, sid in enumerate(todo, 1):
         if download:
-            fetch(name, data_dir, paths=by_subject[sid], workers=workers,
-                  refresh_manifest=False, quiet_if_done=True)
+            try:
+                fetch(name, data_dir, paths=by_subject[sid], workers=workers,
+                      refresh_manifest=False, quiet_if_done=True)
+            except OSError as e:  # one unreachable subject shouldn't stop the rest
+                failed.append(sid)
+                log(f"[{i}/{len(todo)}] {name}/{sid}: FAILED download, skipping for now: {e}")
+                continue
         nights = mod.load(root, cache_dir=None, subjects=[sid])
         if max_nights:
             nights = sorted(nights, key=lambda n: _night_order(n.night_id))[:max_nights]
@@ -118,6 +124,9 @@ def featurize(name: str, data_dir: Path, feat_root: Path, download: bool = False
                 (root / rel).unlink(missing_ok=True)
         finished.append(sid)
         log(f"[{i}/{len(todo)}] {name}/{sid}: {len(nights)} nights")
+    if failed:
+        # Partial downloads are kept, so a re-run resumes them.
+        raise IOError(f"{len(failed)} subject(s) failed to download: {', '.join(failed)}")
     return finished
 
 
