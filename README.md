@@ -122,3 +122,8 @@ uv run pytest
 ```
 
 Tests use synthetic nights written in each dataset's on-disk format.
+
+## License
+
+Code: MIT (see `LICENSE`). The datasets keep their own licences (see the table above); this repository
+contains no raw data. Not a medical device.
