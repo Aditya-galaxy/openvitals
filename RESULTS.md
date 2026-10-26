@@ -6,6 +6,79 @@ v0.1 below: Walch has motion + HR; BIDSleep is **HR only** locally, so every BID
 number here is HR-only. [`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)
 fills in motion on Colab.
 
+## v0.4: motion + HR on both datasets (2026-10-26)
+
+BIDSleep **with motion** was featurized on Google Cloud (`cloud/gcp/`). PhysioNet throttles
+downloads to about 25 KB/s per connection everywhere we tried, so this uses **1 night per subject
+(all 47 subjects)**. That's ~5.2 GB in ~18 h with 8 parallel workers. Motion covers 92% of labelled
+epochs. Every number pools **5 seeds** with **95% subject-bootstrap CIs**, and Δ is a *paired*
+bootstrap (method as in v0.3). Reports are in `results/v04/`.
+
+### 4-class kappa [95% CI], 5 seeds, BIDSleep = 47 subjects × 1 night
+
+| model | BIDSleep 5-fold | BIDSleep → Walch | Walch → BIDSleep |
+|---|---|---|---|
+| gbdt_hr | 0.335 [0.300, 0.365] | 0.291 [0.261, 0.319] | 0.312 [0.276, 0.345] |
+| gbdt_motion_hr | 0.347 [0.312, 0.380] | 0.324 [0.294, 0.352] | 0.299 [0.266, 0.329] |
+| tcn_hr | **0.476** [0.424, 0.520] | 0.434 [0.390, 0.475] | **0.431** [0.385, 0.472] |
+| tcn_motion_hr | 0.467 [0.418, 0.511] | **0.447** [0.404, 0.487] | 0.411 [0.367, 0.450] |
+| gru_hr | 0.448 [0.396, 0.495] | 0.420 [0.378, 0.458] | 0.417 [0.373, 0.459] |
+| gru_motion_hr | 0.446 [0.397, 0.489] | 0.425 [0.381, 0.465] | 0.381 [0.333, 0.424] |
+
+### Does motion help? (paired Δ kappa, motion + HR − HR only)
+
+| split | TCN | GRU | gbdt |
+|---|---|---|---|
+| BIDSleep 5-fold | −0.009 [−0.024, +0.007] | −0.002 | +0.013 [−0.005, +0.031] |
+| BIDSleep → Walch | +0.013 [−0.003, +0.027] (P = 0.06) | +0.005 | +0.033 [+0.014, +0.051] |
+| Walch → BIDSleep | **−0.020 [−0.041, −0.000]** | **−0.037** | −0.013 [−0.031, +0.005] |
+
+(GRU and gbdt rows are read from each report's reference comparisons. GRU's Δ is the difference of the
+two Δs vs `tcn_hr`, so it's indicative only.)
+
+### Do more training nights help? (paired Δ, same Walch test subjects, HR only)
+
+BIDSleep → Walch trained on **253 nights** (v0.3) vs **47 nights** (v0.4):
+
+| model | 253 nights | 47 nights | Δ [95% CI] |
+|---|---|---|---|
+| tcn_hr | 0.482 | 0.434 | **+0.048 [+0.033, +0.063]** |
+| gru_hr | 0.488 | 0.420 | **+0.068 [+0.051, +0.086]** |
+| gbdt_hr | 0.313 | 0.291 | +0.022 [+0.008, +0.035] |
+
+### What we learned
+
+1. **Motion adds no kappa, and it hurts transfer from lab to home.** With motion on both datasets,
+   no split shows a resolved gain for the sequence models. Trained on Walch (lab sleep studies) and
+   tested on BIDSleep (home), motion makes the TCN *worse* (−0.020) and the GRU worse still.
+   Motion shifts predictions toward wake: wake sensitivity 51% → 64% (TCN, Walch→BIDSleep), but deep
+   and REM drop, and total-sleep-time bias grows from −7 to −27 min. Wrist movement during sleep
+   differs between a lab bed and home, and ENMO is calibration-dependent (v0.1, point 3).
+   Baselines with no night context still gain from motion (gbdt +0.033 BIDSleep→Walch).
+2. **More nights beat more signals.** Training on 253 HR-only nights instead of 47 adds +0.05 to +0.07
+   kappa, which is more than motion ever did. HR + labels for all 253 nights is only ~30 MB, while
+   motion is ~27 GB.
+3. **The sequence models still beat the baselines everywhere**, by +0.10 to +0.14 kappa (all CIs
+   exclude 0).
+4. **TCN vs GRU tracks training-set size again.** On 47 BIDSleep nights the TCN wins (+0.028
+   [+0.014, +0.041] on 5-fold). On 253 nights the GRU won (v0.3), consistent with the GRU needing
+   more data.
+
+### Against the v1 targets
+
+The best cross-dataset 4-class kappa is still **0.488** (gru_hr, BIDSleep → Walch, 253 HR nights, v0.3).
+The 0.55 target is not met. v0.4 doesn't beat it, because it trains on 5× fewer nights.
+
+### Next steps (revised)
+
+1. **Drop motion from the main model; scale heart-rate nights instead.** Pool all 253 BIDSleep HR
+   nights with Walch for training (cheap), and add DREAMT (credentialed, PPG + PSG, 100 subjects).
+2. Keep `*_motion_hr` as an option for wake-sensitive uses, after per-device accelerometer
+   recalibration.
+3. Night-level TST limits of agreement (±45–60 min) are still the weakest number.
+
+---
+
 ## v0.3: five seeds and subject-bootstrap confidence intervals (2026-10-17)
 
 Every 4-class number below pools **5 training seeds** (0–4) on fixed folds. Brackets are **95% CIs

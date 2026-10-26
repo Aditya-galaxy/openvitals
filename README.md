@@ -8,7 +8,7 @@ sensor data, but each one reinvents sleep staging and recovery scoring with no
 published accuracy. OpenVitals is a shared, device-agnostic library with
 numbers attached.
 
-**Status:** v0.3 – baselines, whole-night sequence models, 5-seed results with subject-bootstrap CIs; see [RESULTS.md](RESULTS.md). Not a medical device; for
+**Status:** v0.4 – baselines, whole-night sequence models, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets; see [RESULTS.md](RESULTS.md). Not a medical device; for
 wellness and research use only.
 
 ## Benchmark rules
