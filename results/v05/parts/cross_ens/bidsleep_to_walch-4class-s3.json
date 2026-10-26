@@ -1,0 +1,1487 @@
+{
+ "openvitals_version": "0.1.0",
+ "python": "3.11.15",
+ "setup": {
+  "split": "bidsleep_to_walch",
+  "k": 5,
+  "seed": 0,
+  "description": "bidsleep (47 subjects, 253 nights); test: walch (31 subjects, 31 nights)",
+  "scheme": "4class",
+  "classes": [
+   "wake",
+   "light",
+   "deep",
+   "rem"
+  ],
+  "folds": [
+   {
+    "name": "bidsleep->walch",
+    "n_train": 253,
+    "n_test": 31
+   }
+  ]
+ },
+ "skipped_models": [],
+ "reference": "ens_hr",
+ "results": [
+  {
+   "model": "ens_hr",
+   "scheme": "4class",
+   "seeds": [
+    3
+   ],
+   "pooled": {
+    "n_epochs": 25962,
+    "accuracy": 0.6586934750789616,
+    "kappa": 0.5055686968854495,
+    "macro_f1": 0.6319142718934294,
+    "per_class": {
+     "wake": {
+      "support": 2244,
+      "sensitivity": 0.535204991087344,
+      "precision": 0.535921463632307,
+      "f1": 0.5355629877369008
+     },
+     "light": {
+      "support": 14460,
+      "sensitivity": 0.551106500691563,
+      "precision": 0.8607690645927846,
+      "f1": 0.6719790876127836
+     },
+     "deep": {
+      "support": 3577,
+      "sensitivity": 0.8146491473301649,
+      "precision": 0.49769427839453456,
+      "f1": 0.6178965224766751
+     },
+     "rem": {
+      "support": 5681,
+      "sensitivity": 0.883119169160359,
+      "precision": 0.5828299256505576,
+      "f1": 0.7022184897473581
+     }
+    },
+    "confusion": [
+     [
+      1201,
+      434,
+      169,
+      440
+     ],
+     [
+      843,
+      7969,
+      2674,
+      2974
+     ],
+     [
+      46,
+      440,
+      2914,
+      177
+     ],
+     [
+      151,
+      415,
+      98,
+      5017
+     ]
+    ]
+   },
+   "seed_kappa": {
+    "values": [
+     0.5055686968854495
+    ],
+    "mean": 0.5055686968854495,
+    "sd": 0.0
+   },
+   "ci": {
+    "n_boot": 2000,
+    "level": 0.95,
+    "kappa": [
+     0.4684323337658643,
+     0.5429200035087853
+    ],
+    "accuracy": [
+     0.6315694335825474,
+     0.6845146729083311
+    ],
+    "macro_f1": [
+     0.6022181460448672,
+     0.6588525586397288
+    ],
+    "sensitivity": {
+     "wake": [
+      0.45738425512766695,
+      0.6127262498376965
+     ],
+     "light": [
+      0.5154376055740231,
+      0.587301639892898
+     ],
+     "deep": [
+      0.7475847174679523,
+      0.8812138424654268
+     ],
+     "rem": [
+      0.8410271332280729,
+      0.9199921402660218
+     ]
+    }
+   },
+   "per_subject": {
+    "n_subjects": 31,
+    "kappa_mean": 0.4917386105659458,
+    "kappa_sd": 0.12307389039059616,
+    "accuracy_mean": 0.6500695832738359,
+    "accuracy_sd": 0.0961825147180686
+   },
+   "night_agreement": {
+    "tst_min": {
+     "n": 31,
+     "bias": 0.04838709677419355,
+     "loa_low": -37.2906459090021,
+     "loa_high": 37.387420102550486,
+     "mae": 15.951612903225806
+    },
+    "waso_min": {
+     "n": 31,
+     "bias": -4.338709677419355,
+     "loa_low": -35.00961724766898,
+     "loa_high": 26.33219789283027,
+     "mae": 12.82258064516129
+    },
+    "se": {
+     "n": 31,
+     "bias": -0.004077404677216164,
+     "loa_low": -0.10925954022592085,
+     "loa_high": 0.10110473087148852,
+     "mae": 0.04121110478843696
+    },
+    "sol_min": {
+     "n": 31,
+     "bias": 5.096774193548387,
+     "loa_low": -13.491252684681761,
+     "loa_high": 23.684801071778537,
+     "mae": 8.064516129032258
+    }
+   },
+   "seconds": 2412.5085221669997,
+   "per_seed": [
+    {
+     "seed": 3,
+     "seconds": 2412.5085221669997,
+     "subjects": [
+      "walch/1066528",
+      "walch/1360686",
+      "walch/1449548",
+      "walch/1455390",
+      "walch/1818471",
+      "walch/2598705",
+      "walch/2638030",
+      "walch/3509524",
+      "walch/3997827",
+      "walch/4018081",
+      "walch/4314139",
+      "walch/4426783",
+      "walch/46343",
+      "walch/5132496",
+      "walch/5383425",
+      "walch/5498603",
+      "walch/5797046",
+      "walch/6220552",
+      "walch/759667",
+      "walch/7749105",
+      "walch/781756",
+      "walch/8000685",
+      "walch/8173033",
+      "walch/8258170",
+      "walch/844359",
+      "walch/8530312",
+      "walch/8686948",
+      "walch/8692923",
+      "walch/9106476",
+      "walch/9618981",
+      "walch/9961348"
+     ],
+     "subject_confusions": [
+      [
+       [
+        84,
+        46,
+        7,
+        15
+       ],
+       [
+        25,
+        255,
+        43,
+        43
+       ],
+       [
+        0,
+        21,
+        41,
+        0
+       ],
+       [
+        0,
+        7,
+        0,
+        298
+       ]
+      ],
+      [
+       [
+        59,
+        13,
+        28,
+        17
+       ],
+       [
+        11,
+        224,
+        85,
+        140
+       ],
+       [
+        0,
+        1,
+        153,
+        9
+       ],
+       [
+        0,
+        23,
+        0,
+        185
+       ]
+      ],
+      [
+       [
+        21,
+        24,
+        3,
+        57
+       ],
+       [
+        8,
+        316,
+        162,
+        66
+       ],
+       [
+        0,
+        0,
+        72,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        224
+       ]
+      ],
+      [
+       [
+        9,
+        56,
+        8,
+        11
+       ],
+       [
+        12,
+        383,
+        189,
+        107
+       ],
+       [
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        14,
+        12,
+        0,
+        154
+       ]
+      ],
+      [
+       [
+        5,
+        4,
+        0,
+        1
+       ],
+       [
+        19,
+        328,
+        98,
+        141
+       ],
+       [
+        0,
+        1,
+        141,
+        0
+       ],
+       [
+        15,
+        4,
+        0,
+        201
+       ]
+      ],
+      [
+       [
+        10,
+        4,
+        1,
+        5
+       ],
+       [
+        53,
+        401,
+        40,
+        37
+       ],
+       [
+        0,
+        0,
+        152,
+        0
+       ],
+       [
+        26,
+        66,
+        5,
+        152
+       ]
+      ],
+      [
+       [
+        65,
+        17,
+        18,
+        23
+       ],
+       [
+        2,
+        292,
+        147,
+        92
+       ],
+       [
+        0,
+        9,
+        117,
+        0
+       ],
+       [
+        0,
+        3,
+        0,
+        163
+       ]
+      ],
+      [
+       [
+        35,
+        5,
+        2,
+        11
+       ],
+       [
+        10,
+        138,
+        60,
+        63
+       ],
+       [
+        0,
+        0,
+        45,
+        0
+       ],
+       [
+        0,
+        6,
+        0,
+        42
+       ]
+      ],
+      [
+       [
+        22,
+        0,
+        0,
+        3
+       ],
+       [
+        31,
+        336,
+        56,
+        130
+       ],
+       [
+        0,
+        2,
+        85,
+        0
+       ],
+       [
+        9,
+        32,
+        0,
+        252
+       ]
+      ],
+      [
+       [
+        53,
+        23,
+        2,
+        13
+       ],
+       [
+        12,
+        94,
+        66,
+        35
+       ],
+       [
+        9,
+        11,
+        157,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        35
+       ]
+      ],
+      [
+       [
+        57,
+        11,
+        13,
+        23
+       ],
+       [
+        52,
+        281,
+        100,
+        165
+       ],
+       [
+        1,
+        27,
+        68,
+        0
+       ],
+       [
+        0,
+        10,
+        19,
+        134
+       ]
+      ],
+      [
+       [
+        60,
+        5,
+        2,
+        3
+       ],
+       [
+        36,
+        302,
+        161,
+        53
+       ],
+       [
+        0,
+        21,
+        34,
+        0
+       ],
+       [
+        7,
+        9,
+        11,
+        276
+       ]
+      ],
+      [
+       [
+        54,
+        12,
+        8,
+        11
+       ],
+       [
+        1,
+        114,
+        59,
+        25
+       ],
+       [
+        0,
+        0,
+        156,
+        0
+       ],
+       [
+        4,
+        11,
+        0,
+        99
+       ]
+      ],
+      [
+       [
+        23,
+        1,
+        4,
+        5
+       ],
+       [
+        17,
+        125,
+        16,
+        122
+       ],
+       [
+        0,
+        2,
+        150,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0
+       ]
+      ],
+      [
+       [
+        38,
+        0,
+        1,
+        1
+       ],
+       [
+        22,
+        268,
+        57,
+        96
+       ],
+       [
+        3,
+        0,
+        146,
+        75
+       ],
+       [
+        0,
+        36,
+        8,
+        225
+       ]
+      ],
+      [
+       [
+        63,
+        35,
+        7,
+        2
+       ],
+       [
+        26,
+        176,
+        134,
+        46
+       ],
+       [
+        0,
+        46,
+        111,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        98
+       ]
+      ],
+      [
+       [
+        59,
+        8,
+        4,
+        8
+       ],
+       [
+        48,
+        342,
+        49,
+        144
+       ],
+       [
+        0,
+        4,
+        125,
+        0
+       ],
+       [
+        8,
+        2,
+        0,
+        138
+       ]
+      ],
+      [
+       [
+        22,
+        8,
+        0,
+        23
+       ],
+       [
+        35,
+        270,
+        62,
+        213
+       ],
+       [
+        0,
+        69,
+        112,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        141
+       ]
+      ],
+      [
+       [
+        12,
+        0,
+        1,
+        5
+       ],
+       [
+        22,
+        53,
+        68,
+        14
+       ],
+       [
+        5,
+        0,
+        134,
+        0
+       ],
+       [
+        4,
+        1,
+        0,
+        156
+       ]
+      ],
+      [
+       [
+        37,
+        3,
+        2,
+        11
+       ],
+       [
+        44,
+        8,
+        51,
+        1
+       ],
+       [
+        10,
+        0,
+        14,
+        1
+       ],
+       [
+        0,
+        3,
+        14,
+        4
+       ]
+      ],
+      [
+       [
+        36,
+        24,
+        19,
+        4
+       ],
+       [
+        27,
+        480,
+        103,
+        30
+       ],
+       [
+        0,
+        0,
+        23,
+        0
+       ],
+       [
+        0,
+        27,
+        25,
+        183
+       ]
+      ],
+      [
+       [
+        20,
+        8,
+        0,
+        5
+       ],
+       [
+        84,
+        394,
+        47,
+        76
+       ],
+       [
+        0,
+        7,
+        59,
+        0
+       ],
+       [
+        0,
+        20,
+        3,
+        234
+       ]
+      ],
+      [
+       [
+        19,
+        4,
+        3,
+        3
+       ],
+       [
+        25,
+        282,
+        116,
+        104
+       ],
+       [
+        5,
+        71,
+        80,
+        37
+       ],
+       [
+        0,
+        0,
+        5,
+        201
+       ]
+      ],
+      [
+       [
+        69,
+        0,
+        16,
+        10
+       ],
+       [
+        6,
+        282,
+        84,
+        76
+       ],
+       [
+        1,
+        8,
+        105,
+        18
+       ],
+       [
+        25,
+        1,
+        6,
+        265
+       ]
+      ],
+      [
+       [
+        41,
+        2,
+        3,
+        47
+       ],
+       [
+        74,
+        219,
+        40,
+        158
+       ],
+       [
+        10,
+        16,
+        82,
+        6
+       ],
+       [
+        2,
+        8,
+        0,
+        189
+       ]
+      ],
+      [
+       [
+        48,
+        9,
+        5,
+        16
+       ],
+       [
+        48,
+        256,
+        97,
+        102
+       ],
+       [
+        0,
+        32,
+        71,
+        0
+       ],
+       [
+        2,
+        3,
+        0,
+        258
+       ]
+      ],
+      [
+       [
+        45,
+        1,
+        2,
+        1
+       ],
+       [
+        31,
+        258,
+        50,
+        237
+       ],
+       [
+        0,
+        49,
+        122,
+        0
+       ],
+       [
+        0,
+        1,
+        0,
+        158
+       ]
+      ],
+      [
+       [
+        46,
+        51,
+        0,
+        13
+       ],
+       [
+        4,
+        313,
+        56,
+        104
+       ],
+       [
+        0,
+        18,
+        124,
+        0
+       ],
+       [
+        20,
+        40,
+        0,
+        147
+       ]
+      ],
+      [
+       [
+        5,
+        7,
+        3,
+        72
+       ],
+       [
+        21,
+        300,
+        121,
+        185
+       ],
+       [
+        0,
+        24,
+        122,
+        13
+       ],
+       [
+        0,
+        3,
+        2,
+        83
+       ]
+      ],
+      [
+       [
+        27,
+        40,
+        7,
+        20
+       ],
+       [
+        25,
+        328,
+        51,
+        109
+       ],
+       [
+        1,
+        1,
+        106,
+        0
+       ],
+       [
+        6,
+        31,
+        0,
+        193
+       ]
+      ],
+      [
+       [
+        57,
+        13,
+        0,
+        1
+       ],
+       [
+        12,
+        151,
+        206,
+        60
+       ],
+       [
+        1,
+        0,
+        7,
+        18
+       ],
+       [
+        9,
+        56,
+        0,
+        129
+       ]
+      ]
+     ],
+     "nights": [
+      {
+       "seed": 3,
+       "night": "walch/1066528/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 885,
+       "kappa": 0.6556620885265808,
+       "true_tst_min": 366.5,
+       "true_waso_min": 46.0,
+       "true_se": 0.8282485875706215,
+       "true_sol_min": 25.0,
+       "pred_tst_min": 388.0,
+       "pred_waso_min": 26.0,
+       "pred_se": 0.8768361581920904,
+       "pred_sol_min": 28.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/1360686/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 948,
+       "kappa": 0.5260637712356748,
+       "true_tst_min": 415.5,
+       "true_waso_min": 22.5,
+       "true_se": 0.8765822784810127,
+       "true_sol_min": 36.0,
+       "pred_tst_min": 439.0,
+       "pred_waso_min": 9.0,
+       "pred_se": 0.9261603375527426,
+       "pred_sol_min": 22.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/1449548/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 953,
+       "kappa": 0.5102554714048037,
+       "true_tst_min": 424.0,
+       "true_waso_min": 20.0,
+       "true_se": 0.8898216159496327,
+       "true_sol_min": 9.5,
+       "pred_tst_min": 462.0,
+       "pred_waso_min": 0.0,
+       "pred_se": 0.9695697796432319,
+       "pred_sol_min": 14.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/1455390/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 955,
+       "kappa": 0.287864367966978,
+       "true_tst_min": 435.5,
+       "true_waso_min": 34.5,
+       "true_se": 0.912041884816754,
+       "true_sol_min": 6.0,
+       "pred_tst_min": 460.0,
+       "pred_waso_min": 14.0,
+       "pred_se": 0.9633507853403142,
+       "pred_sol_min": 3.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/1818471/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 958,
+       "kappa": 0.5559104593984544,
+       "true_tst_min": 474.0,
+       "true_waso_min": 2.5,
+       "true_se": 0.9895615866388309,
+       "true_sol_min": 2.5,
+       "pred_tst_min": 459.5,
+       "pred_waso_min": 12.0,
+       "pred_se": 0.9592901878914405,
+       "pred_sol_min": 7.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/2598705/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 952,
+       "kappa": 0.6083059471790091,
+       "true_tst_min": 466.0,
+       "true_waso_min": 6.5,
+       "true_se": 0.9789915966386554,
+       "true_sol_min": 3.5,
+       "pred_tst_min": 431.5,
+       "pred_waso_min": 36.5,
+       "pred_se": 0.9065126050420168,
+       "pred_sol_min": 8.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/2638030/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 948,
+       "kappa": 0.53766250058806,
+       "true_tst_min": 412.5,
+       "true_waso_min": 40.0,
+       "true_se": 0.870253164556962,
+       "true_sol_min": 21.5,
+       "pred_tst_min": 440.5,
+       "pred_waso_min": 21.0,
+       "pred_se": 0.929324894514768,
+       "pred_sol_min": 12.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/3509524/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 417,
+       "kappa": 0.4577777409683458,
+       "true_tst_min": 182.0,
+       "true_waso_min": 12.0,
+       "true_se": 0.8729016786570744,
+       "true_sol_min": 14.5,
+       "pred_tst_min": 186.0,
+       "pred_waso_min": 0.0,
+       "pred_se": 0.8920863309352518,
+       "pred_sol_min": 22.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/3997827/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 958,
+       "kappa": 0.570434349703,
+       "true_tst_min": 466.5,
+       "true_waso_min": 3.0,
+       "true_se": 0.9739039665970772,
+       "true_sol_min": 9.5,
+       "pred_tst_min": 448.0,
+       "pred_waso_min": 11.0,
+       "pred_se": 0.9352818371607515,
+       "pred_sol_min": 16.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/4018081/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 510,
+       "kappa": 0.5263929618768328,
+       "true_tst_min": 209.5,
+       "true_waso_min": 7.5,
+       "true_se": 0.8215686274509804,
+       "true_sol_min": 10.5,
+       "pred_tst_min": 218.0,
+       "pred_waso_min": 25.0,
+       "pred_se": 0.8549019607843137,
+       "pred_sol_min": 12.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/4314139/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 961,
+       "kappa": 0.37142994750276936,
+       "true_tst_min": 428.5,
+       "true_waso_min": 36.5,
+       "true_se": 0.8917793964620188,
+       "true_sol_min": 11.5,
+       "pred_tst_min": 425.5,
+       "pred_waso_min": 30.0,
+       "pred_se": 0.8855359001040582,
+       "pred_sol_min": 23.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/4426783/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 980,
+       "kappa": 0.5392670157068064,
+       "true_tst_min": 455.0,
+       "true_waso_min": 22.0,
+       "true_se": 0.9285714285714286,
+       "true_sol_min": 13.0,
+       "pred_tst_min": 438.5,
+       "pred_waso_min": 28.0,
+       "pred_se": 0.8948979591836734,
+       "pred_sol_min": 18.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/46343/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 554,
+       "kappa": 0.6766729038581484,
+       "true_tst_min": 234.5,
+       "true_waso_min": 8.5,
+       "true_se": 0.8465703971119134,
+       "true_sol_min": 17.0,
+       "pred_tst_min": 247.5,
+       "pred_waso_min": 2.5,
+       "pred_se": 0.8935018050541517,
+       "pred_sol_min": 14.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/5132496/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 465,
+       "kappa": 0.4931962799804209,
+       "true_tst_min": 216.0,
+       "true_waso_min": 5.5,
+       "true_se": 0.9290322580645162,
+       "true_sol_min": 11.0,
+       "pred_tst_min": 212.5,
+       "pred_waso_min": 0.0,
+       "pred_se": 0.9139784946236559,
+       "pred_sol_min": 20.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/5383425/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 976,
+       "kappa": 0.5585801304789119,
+       "true_tst_min": 468.0,
+       "true_waso_min": 10.5,
+       "true_se": 0.9590163934426229,
+       "true_sol_min": 9.5,
+       "pred_tst_min": 456.5,
+       "pred_waso_min": 1.5,
+       "pred_se": 0.9354508196721312,
+       "pred_sol_min": 30.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/5498603/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 744,
+       "kappa": 0.43815678360678323,
+       "true_tst_min": 318.5,
+       "true_waso_min": 48.5,
+       "true_se": 0.8561827956989247,
+       "true_sol_min": 5.0,
+       "pred_tst_min": 327.5,
+       "pred_waso_min": 26.5,
+       "pred_se": 0.8803763440860215,
+       "pred_sol_min": 18.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/5797046/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 939,
+       "kappa": 0.5690547157404966,
+       "true_tst_min": 430.0,
+       "true_waso_min": 32.0,
+       "true_se": 0.9158679446219382,
+       "true_sol_min": 7.5,
+       "pred_tst_min": 412.0,
+       "pred_waso_min": 43.5,
+       "pred_se": 0.8775292864749734,
+       "pred_sol_min": 10.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/6220552/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 955,
+       "kappa": 0.37160263395672877,
+       "true_tst_min": 451.0,
+       "true_waso_min": 16.5,
+       "true_se": 0.9445026178010472,
+       "true_sol_min": 9.5,
+       "pred_tst_min": 449.0,
+       "pred_waso_min": 9.0,
+       "pred_se": 0.9403141361256544,
+       "pred_sol_min": 19.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/759667/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 475,
+       "kappa": 0.6437076902882217,
+       "true_tst_min": 228.5,
+       "true_waso_min": 3.0,
+       "true_se": 0.9621052631578947,
+       "true_sol_min": 6.0,
+       "pred_tst_min": 216.0,
+       "pred_waso_min": 5.5,
+       "pred_se": 0.9094736842105263,
+       "pred_sol_min": 16.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/7749105/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 203,
+       "kappa": 0.12682806931301463,
+       "true_tst_min": 75.0,
+       "true_waso_min": 1.5,
+       "true_se": 0.7389162561576355,
+       "true_sol_min": 17.5,
+       "pred_tst_min": 56.0,
+       "pred_waso_min": 26.0,
+       "pred_se": 0.5517241379310345,
+       "pred_sol_min": 19.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/781756/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 981,
+       "kappa": 0.5482132410599818,
+       "true_tst_min": 449.0,
+       "true_waso_min": 15.0,
+       "true_se": 0.9153924566768603,
+       "true_sol_min": 26.5,
+       "pred_tst_min": 459.0,
+       "pred_waso_min": 14.5,
+       "pred_se": 0.9357798165137615,
+       "pred_sol_min": 17.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/8000685/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 957,
+       "kappa": 0.5776244220472108,
+       "true_tst_min": 462.0,
+       "true_waso_min": 8.5,
+       "true_se": 0.9655172413793104,
+       "true_sol_min": 8.0,
+       "pred_tst_min": 426.5,
+       "pred_waso_min": 2.5,
+       "pred_se": 0.8913270637408568,
+       "pred_sol_min": 45.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/8173033/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 955,
+       "kappa": 0.41797122003584836,
+       "true_tst_min": 463.0,
+       "true_waso_min": 5.5,
+       "true_se": 0.9696335078534032,
+       "true_sol_min": 9.0,
+       "pred_tst_min": 453.0,
+       "pred_waso_min": 7.5,
+       "pred_se": 0.9486910994764398,
+       "pred_sol_min": 17.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/8258170/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 972,
+       "kappa": 0.6344309654527583,
+       "true_tst_min": 438.5,
+       "true_waso_min": 6.5,
+       "true_se": 0.9022633744855967,
+       "true_sol_min": 41.0,
+       "pred_tst_min": 435.5,
+       "pred_waso_min": 16.5,
+       "pred_se": 0.8960905349794238,
+       "pred_sol_min": 34.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/844359/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 897,
+       "kappa": 0.43264443457477975,
+       "true_tst_min": 402.0,
+       "true_waso_min": 33.5,
+       "true_se": 0.8963210702341137,
+       "true_sol_min": 11.0,
+       "pred_tst_min": 385.0,
+       "pred_waso_min": 38.0,
+       "pred_se": 0.8584169453734671,
+       "pred_sol_min": 22.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/8530312/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 947,
+       "kappa": 0.5215925142947239,
+       "true_tst_min": 434.5,
+       "true_waso_min": 25.5,
+       "true_se": 0.9176346356916578,
+       "true_sol_min": 13.5,
+       "pred_tst_min": 424.5,
+       "pred_waso_min": 21.0,
+       "pred_se": 0.8965153115100317,
+       "pred_sol_min": 16.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/8686948/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 955,
+       "kappa": 0.4428159391717992,
+       "true_tst_min": 453.0,
+       "true_waso_min": 9.0,
+       "true_se": 0.9486910994764398,
+       "true_sol_min": 15.5,
+       "pred_tst_min": 439.5,
+       "pred_waso_min": 12.0,
+       "pred_se": 0.9204188481675393,
+       "pred_sol_min": 26.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/8692923/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 936,
+       "kappa": 0.5119800168343858,
+       "true_tst_min": 413.0,
+       "true_waso_min": 46.0,
+       "true_se": 0.8824786324786325,
+       "true_sol_min": 9.0,
+       "pred_tst_min": 433.0,
+       "pred_waso_min": 16.0,
+       "pred_se": 0.9252136752136753,
+       "pred_sol_min": 9.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/9106476/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 961,
+       "kappa": 0.32421551583001346,
+       "true_tst_min": 437.0,
+       "true_waso_min": 41.5,
+       "true_se": 0.9094693028095734,
+       "true_sol_min": 2.0,
+       "pred_tst_min": 467.5,
+       "pred_waso_min": 5.0,
+       "pred_se": 0.9729448491155047,
+       "pred_sol_min": 8.0
+      },
+      {
+       "seed": 3,
+       "night": "walch/9618981/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 945,
+       "kappa": 0.5343069599513638,
+       "true_tst_min": 425.5,
+       "true_waso_min": 40.0,
+       "true_se": 0.9005291005291005,
+       "true_sol_min": 7.0,
+       "pred_tst_min": 443.0,
+       "pred_waso_min": 13.0,
+       "pred_se": 0.9375661375661376,
+       "pred_sol_min": 16.5
+      },
+      {
+       "seed": 3,
+       "night": "walch/9961348/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 720,
+       "kappa": 0.27327586901141143,
+       "true_tst_min": 324.5,
+       "true_waso_min": 18.0,
+       "true_se": 0.9013888888888889,
+       "true_sol_min": 14.0,
+       "pred_tst_min": 320.5,
+       "pred_waso_min": 20.5,
+       "pred_se": 0.8902777777777777,
+       "pred_sol_min": 12.5
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "comparisons": []
+}

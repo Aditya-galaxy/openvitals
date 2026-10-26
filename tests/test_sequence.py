@@ -58,3 +58,24 @@ def test_gru_onnx_export(walch_nights, tmp_path):
     night = walch_nights[7]
     x = features.extract(night, "motion+hr").X.astype(np.float32)[None]
     np.testing.assert_allclose(sess.run(None, {"features": x})[0][0], m.predict_logits(night), rtol=1e-4, atol=1e-4)
+
+
+def test_ensemble_averages_tcn_and_gru(walch_nights):
+    from openvitals.models.sequence import Ensemble
+
+    train, night = walch_nights[:6], walch_nights[7]
+    ens = Ensemble("hr", max_epochs=2, seed=3).fit(train, "4class")
+    assert models.make("ens_hr").name == "ens_hr" and [m.arch for m in ens.members] == ["tcn", "gru"]
+    singles = [SequenceModel(a, "hr", max_epochs=2, seed=3).fit(train, "4class") for a in ("tcn", "gru")]
+    for m, s in zip(ens.members, singles):  # members are exactly the single models
+        np.testing.assert_allclose(m.predict_logits(night), s.predict_logits(night), rtol=1e-5, atol=1e-5)
+    p = ens.predict_proba(night)
+    np.testing.assert_allclose(p.sum(1), 1.0, rtol=1e-6)
+    assert (ens.predict(night) == p.argmax(1)).all()
+
+
+def test_ens10_members_cover_five_seeds_per_arch():
+    m = models.make("ens10_hr", seed=1)
+    assert m.name == "ens10_hr" and len(m.members) == 10
+    assert [(x.arch, x.seed) for x in m.members[:5]] == [("tcn", s) for s in range(5, 10)]
+    assert models.make("ens_hr", seed=2).name == "ens_hr"

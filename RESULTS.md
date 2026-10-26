@@ -6,6 +6,105 @@ v0.1 below: Walch has motion + HR; BIDSleep is **HR only** locally, so every BID
 number here is HR-only. [`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)
 fills in motion on Colab.
 
+## v0.5: all 253 HR nights, pooled training, and ensembles (2026-10-26)
+
+v0.4 concluded that more heart-rate nights beat motion. v0.5 tests that at full scale, locally,
+from the feature stores (no new downloads): all **253 BIDSleep HR-only nights** (47 subjects) plus
+the 31 Walch nights, HR only. Every number pools **5 seeds** with **95% subject-bootstrap CIs**.
+Δ is a *paired* subject bootstrap. Comparisons across reports use the new
+`openvitals compare A.json:MODEL B.json:MODEL`, which is paired over the test subjects both reports
+share. Reports are in `results/v05/`.
+
+**Pooled design.** We trained on Walch + BIDSleep pooled and evaluated with **subject-wise 5-fold
+over all 78 subjects** (folds as `--seed 0`; each fold holds out 2–8 Walch and 7–14 BIDSleep
+subjects). We didn't use leave-one-dataset-out: with only two datasets, it reduces to the two cross
+splits we already have (BIDSleep → Walch below, and Walch → BIDSleep in v0.3), so it says nothing
+about pooling. K-fold measures the model we would actually ship, trained on both cohorts. And
+`merge --dataset` scores it on each cohort's subjects separately, so each half pairs with that
+cohort's single-dataset numbers.
+
+**Reproducibility check.** BIDSleep → Walch from the feature store reproduces v0.3, which was
+run from raw files, **exactly**: Δ = 0.000 for every model and seed.
+
+### 4-class kappa [95% CI], 5 seeds, HR only
+
+| model | BIDSleep (253) → Walch | pooled 5-fold, Walch subjects | pooled 5-fold, BIDSleep subjects | pooled 5-fold, all 78 |
+|---|---|---|---|---|
+| gbdt_hr | 0.313 [0.279, 0.346] | 0.319 [0.285, 0.352] | 0.366 [0.343, 0.387] | 0.361 [0.339, 0.380] |
+| tcn_hr | 0.482 [0.440, 0.523] | 0.488 [0.442, 0.530] | 0.512 [0.484, 0.538] | 0.509 [0.481, 0.532] |
+| gru_hr | 0.488 [0.449, 0.526] | **0.497** [0.458, 0.535] | **0.531** [0.504, 0.556] | **0.527** [0.501, 0.549] |
+| ens_hr (TCN + GRU, same seed) | 0.499 [0.457, 0.541] | – | – | – |
+| ens10_hr (5 TCN + 5 GRU, seeds 0–4) | **0.514** [0.469, 0.558] | – | – | – |
+
+`ens_hr` averages the softmax of the TCN and GRU trained with one seed. `ens10_hr` averages all 10
+seed-0–4 models into one predictor, so it's a single run with no seed SD. Its members are exactly
+the `tcn_hr`/`gru_hr` models above. On BIDSleep → Walch, accuracy is 66.6% [63.6, 69.5] (`ens10_hr`),
+and TST bias is −0.3 min [−38.3, +37.7], the narrowest limits of agreement so far.
+
+### Paired Δ kappa [95% CI], same test subjects
+
+| question | comparison | TCN | GRU | gbdt |
+|---|---|---|---|---|
+| 253 vs 47 BIDSleep nights (v0.4 replicated) | BIDSleep→Walch: v0.5 − v0.4 | **+0.048** [+0.033, +0.063] | **+0.068** [+0.051, +0.086] | +0.022 [+0.008, +0.035] |
+| add Walch to the 253 nights | Walch subjects: pooled − BIDSleep→Walch | +0.006 [−0.005, +0.016] | +0.009 [−0.005, +0.024] | +0.006 [−0.000, +0.013] |
+| add 253 BIDSleep nights to Walch | Walch subjects: pooled − v0.3 Walch 5-fold | +0.009 [−0.017, +0.036] | **+0.073** [+0.047, +0.096] | +0.009 [−0.017, +0.036] |
+| add Walch to BIDSleep | BIDSleep subjects: pooled − v0.3 BIDSleep 5-fold | −0.001 [−0.005, +0.004] | +0.003 [−0.004, +0.011] | +0.002 [−0.001, +0.005] |
+| HR vs best in-domain model | Walch subjects: pooled gru_hr − v0.3 LOSO tcn_motion_hr | – | −0.001 [−0.022, +0.020] | – |
+
+| ensembles (BIDSleep → Walch) | Δ kappa [95% CI] | P(Δ ≤ 0) |
+|---|---|---|
+| ens_hr − gru_hr | +0.011 [+0.004, +0.020] | 0.001 |
+| ens10_hr − gru_hr | **+0.026 [+0.017, +0.036]** | 0.000 |
+| ens10_hr − ens_hr | +0.014 [+0.009, +0.019] | 0.000 |
+
+### What we learned
+
+1. **"More HR nights beat motion" holds at full scale.** The 253-night models replicate v0.4's
+   +0.048 (TCN) and +0.068 (GRU) over 47 nights, and v0.4's best motion gain was +0.013, unresolved.
+2. **Walch subjects plateau at about 0.49–0.50 kappa, however the model is trained.**
+   - In-domain Walch LOSO with motion: 0.498.
+   - BIDSleep → Walch: 0.488.
+   - Pooled, with 179–217 BIDSleep + 23–29 Walch training nights per fold: 0.497.
+
+   Adding Walch's own nights to 253 BIDSleep nights doesn't resolve a gain (+0.009
+   [−0.005, +0.024]), and HR-only pooled ties the best motion + HR in-domain model (Δ −0.001). With 31
+   lab nights and these HR features, the remaining error looks like a property of the test cohort
+   (its PSG labels and HR signal) rather than missing training data or domain shift.
+3. **The GRU is the model that benefits from pooling.** Added to Walch, BIDSleep lifts the GRU by
+   +0.073 on Walch subjects but the TCN by only +0.009. The GRU also wins every pooled column (+0.018
+   [+0.014, +0.022] over the TCN on all 78 subjects), which confirms v0.3 point 4.
+   `gru_hr` trained on the pooled set is the model to export.
+4. **The only resolved gain on the cross split came from ensembling.** A TCN + GRU pair adds +0.011,
+   and averaging 10 seed-and-architecture members adds +0.026. That makes `ens10_hr` the best
+   cross-dataset result so far (0.514). It costs 10× the training and inference of one model, but the
+   members are small (about 10–30k parameters each).
+5. **BIDSleep subjects don't benefit from Walch either.** 23–29 extra nights on top of ~180–220 per fold
+   change nothing (Δ ≤ 0.003).
+
+### Against the v1 targets
+
+| target | v1 goal | v0.5 best | status |
+|---|---|---|---|
+| 4-stage kappa, cross-dataset | ≥ 0.55 | **0.514** [0.469, 0.558] (ens10_hr, BIDSleep 253 → Walch) | **not met**: gap 0.036. The CI's upper end reaches 0.55, but the point estimate is short. |
+| 4-stage kappa, within / pooled | – | 0.531 [0.504, 0.556] (gru_hr, BIDSleep subjects, pooled) | – |
+| 4-class accuracy | ≥ 70% | 67.0% [65.1, 68.8] (gru_hr pooled, BIDSleep subjects) | not met |
+| TST bias | within ±20 min | −0.3 min, limits of agreement ±38 min (ens10_hr, → Walch) | met; limits of agreement still wide |
+
+Progress on cross-dataset kappa: 0.314 (v0.1) → 0.483 (v0.2) → 0.488 (v0.3) → **0.514** (v0.5).
+More BIDSleep-style HR nights won't close the last 0.036. Pooling and the full 253 nights are both
+used up, and Walch scores the same in-domain.
+
+### Next steps (revised)
+
+1. **A new test cohort with denser HR or PPG.** DREAMT (credentialed, PPG + PSG, 100 subjects) can
+   test whether the ~0.50 Walch plateau comes from the cohort (31 nights, coarse HR) or from the
+   method. Beat-level HRV features need PPG.
+2. **Ship pooled `gru_hr`, and export the ensemble.** Make `ens*` ONNX-exportable as one graph
+   that averages softmax, then export it trained on the pooled set.
+3. **A cheaper ensemble.** Check whether 3 + 3 members keep most of the +0.026.
+
+---
+
 ## v0.4: motion + HR on both datasets (2026-10-26)
 
 BIDSleep **with motion** was featurized on Google Cloud (`cloud/gcp/`). PhysioNet throttles

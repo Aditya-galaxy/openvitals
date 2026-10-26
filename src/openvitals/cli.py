@@ -9,6 +9,8 @@
     openvitals bench bidsleep=features:feat --split kfold
     openvitals bench walch=data/walch --models tcn_hr,gbdt_hr --seeds 0,1,2 --reference gbdt_hr
     openvitals merge results/a/kfold-4class-*.json --out results/merged
+    openvitals merge results/pooled/kfold-4class-*.json --dataset walch --out results/merged
+    openvitals compare results/new.json:gru_hr results/old.json:gru_hr --dataset walch
 """
 
 from __future__ import annotations
@@ -59,6 +61,13 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--reference")
     g.add_argument("--bootstrap", type=int, default=benchmark.N_BOOT)
     g.add_argument("--tag")
+    g.add_argument("--dataset", help="score only this dataset's test subjects (e.g. walch of a pooled k-fold)")
+
+    c = sub.add_parser("compare", help="paired Δ kappa of a model in one report against a model in another")
+    c.add_argument("a", metavar="REPORT.json:MODEL")
+    c.add_argument("b", metavar="REPORT.json:MODEL", help="the reference")
+    c.add_argument("--dataset", help="only this dataset's test subjects")
+    c.add_argument("--bootstrap", type=int, default=benchmark.N_BOOT)
 
     e = sub.add_parser("export", help="train a sequence model on all given nights and write ONNX")
     e.add_argument("data", nargs="+", metavar="NAME=PATH")
@@ -84,9 +93,20 @@ def main(argv: list[str] | None = None) -> int:
         import json
 
         merged = benchmark.merge([json.loads(r.read_text()) for r in a.reports], a.reference, a.bootstrap)
+        if a.dataset:
+            merged = benchmark.restrict(merged, a.dataset, a.reference, a.bootstrap)
         jpath, mpath = benchmark.write(merged, a.out, a.tag)
         print(mpath.read_text())
         print(f"wrote {jpath} and {mpath}", file=sys.stderr)
+        return 0
+    if a.cmd == "compare":
+        import json
+
+        (pa, ma), (pb, mb) = (s.rpartition(":")[::2] for s in (a.a, a.b))
+        c = benchmark.compare_reports(json.loads(Path(pa).read_text()), ma, json.loads(Path(pb).read_text()), mb,
+                                      a.bootstrap, a.dataset)
+        print(f"{a.a} − {a.b} on {c['n_subjects']} subjects: kappa {c['kappa']:.3f} vs {c['reference_kappa']:.3f}, "
+              f"Δ {c['delta_kappa']:+.3f} [{c['ci'][0]:+.3f}, {c['ci'][1]:+.3f}], P(Δ ≤ 0) = {c['p_le_0']:.3f}")
         return 0
     if a.cmd == "featurize":
         subjects = [s for s in (a.subjects or "").split(",") if s] or None

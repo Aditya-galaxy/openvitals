@@ -208,6 +208,50 @@ def merge(reports: list[dict], reference: str | None = None, n_boot: int = N_BOO
     return build_report(setup, per_model, skipped, reference, n_boot)
 
 
+def restrict(report: dict, dataset: str, reference: str | None = None, n_boot: int = N_BOOT) -> dict:
+    """The same report scored on one dataset's test subjects only, e.g. the Walch
+    subjects of a model trained and k-folded on Walch + BIDSleep pooled."""
+    prefix = f"{dataset}/"
+    per_model: dict[str, list[dict]] = {}
+    for m in report["results"]:
+        for rec in m["per_seed"]:
+            keep = [i for i, s in enumerate(rec["subjects"]) if s.startswith(prefix)]
+            if not keep:
+                raise ValueError(f"{m['model']}: no {dataset} subjects in this report")
+            per_model.setdefault(m["model"], []).append({
+                **rec, "subjects": [rec["subjects"][i] for i in keep],
+                "subject_confusions": [rec["subject_confusions"][i] for i in keep],
+                "nights": [row for row in rec["nights"] if row["night"].startswith(prefix)],
+            })
+    s = report["setup"]
+    setup = {**s, "split": f"{s['split']}_{dataset}", "description": f"{s['description']}; scored on {dataset} only"}
+    return build_report(setup, per_model, report["skipped_models"], reference or report.get("reference"), n_boot)
+
+
+def compare_reports(a: dict, model_a: str, b: dict, model_b: str, n_boot: int = N_BOOT,
+                    dataset: str | None = None) -> dict:
+    """Paired subject bootstrap of a model in one report against a model in another
+    (e.g. trained on more nights), over the test subjects both reports share."""
+    ra, rb = _result(a, model_a), _result(b, model_b)
+    common = sorted(set(_subjects(ra)) & set(_subjects(rb)))
+    if dataset:
+        common = [s for s in common if s.startswith(f"{dataset}/")]
+    if not common:
+        raise ValueError("the two reports share no test subjects")
+    pick = lambda r: _subject_stack(r)[[_subjects(r).index(s) for s in common]]  # noqa: E731
+    sa, sb = pick(ra), pick(rb)
+    kappa = lambda cms: float(metrics.batch_scores(cms.sum(0)[None])["kappa"][0])  # noqa: E731
+    return {"model": model_a, "reference": model_b, "n_subjects": len(common),
+            "kappa": kappa(sa), "reference_kappa": kappa(sb), **metrics.paired_bootstrap(sa, sb, n_boot)}
+
+
+def _result(report: dict, model: str) -> dict:
+    r = next((r for r in report["results"] if r["model"] == model), None)
+    if r is None:
+        raise ValueError(f"model {model!r} is not in this report")
+    return r
+
+
 # -- output --------------------------------------------------------------------
 
 def write(report: dict, out_dir: Path, tag: str | None = None) -> tuple[Path, Path]:

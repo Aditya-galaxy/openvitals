@@ -27,8 +27,18 @@ BASELINES = {
     "gbdt_hr": lambda seed=0: FeatureModel("gbdt", "hr", seed=seed),
     "gbdt_motion_hr": lambda seed=0: FeatureModel("gbdt", "motion+hr", seed=seed),
 }
+def _ens(inputs: str, n_seeds: int = 1):
+    def make(seed: int = 0):
+        from .sequence import Ensemble
+
+        return Ensemble(inputs, seed=seed, n_seeds=n_seeds)
+    return make
+
+
 SEQUENCE = {f"{a}_{i.replace('+', '_')}": _seq(a, i) for a in ("tcn", "gru") for i in ("hr", "motion+hr")}
-REGISTRY = {**BASELINES, **SEQUENCE}
+ENSEMBLE = {f"ens_{i.replace('+', '_')}": _ens(i) for i in ("hr", "motion+hr")}  # not ONNX-exportable yet
+ENSEMBLE["ens10_hr"] = _ens("hr", n_seeds=5)  # 5 TCN + 5 GRU
+REGISTRY = {**BASELINES, **SEQUENCE, **ENSEMBLE}
 
 
 def make(name: str, seed: int = 0):

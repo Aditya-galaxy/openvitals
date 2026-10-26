@@ -1,0 +1,35 @@
+# OpenVitals benchmark: bidsleep_to_walch / 4class
+
+- Data: bidsleep (47 subjects, 253 nights); test: walch (31 subjects, 31 nights)
+- Folds: 1 (subject-wise; no subject in both train and test)
+- Seeds per model: 1, 5; CIs: 95% subject bootstrap (2000 draws)
+- openvitals 0.1.0, Python 3.11.15
+
+## Epoch agreement (pooled over test epochs and seeds)
+
+| model | seeds | kappa [95% CI] | seed SD | accuracy [95% CI] | macro F1 | wake sens | light sens | deep sens | rem sens | subject kappa (mean ± sd) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| gbdt_hr | 5 | 0.313 [0.279, 0.346] | 0.001 | 49.7% [47.0%, 52.2%] | 0.488 | 49.6% | 34.5% | 68.1% | 77.0% | 0.304 ± 0.088 |
+| tcn_hr | 5 | 0.482 [0.440, 0.523] | 0.016 | 64.2% [61.4%, 66.9%] | 0.613 | 51.5% | 53.6% | 81.3% | 85.2% | 0.469 ± 0.133 |
+| gru_hr | 5 | 0.488 [0.449, 0.526] | 0.009 | 64.7% [62.2%, 67.2%] | 0.621 | 55.1% | 54.7% | 80.4% | 84.1% | 0.473 ± 0.128 |
+| ens_hr | 5 | 0.499 [0.457, 0.541] | 0.012 | 65.5% [62.7%, 68.2%] | 0.628 | 53.7% | 55.2% | 81.5% | 86.4% | 0.485 ± 0.134 |
+| ens10_hr | 1 | 0.514 [0.469, 0.558] | – | 66.6% [63.6%, 69.5%] | 0.638 | 54.0% | 56.1% | 82.7% | 87.9% | 0.498 ± 0.142 |
+
+## Paired comparison against `gru_hr` (same subject draws)
+
+| model | Δ kappa | 95% CI | P(Δ ≤ 0) |
+|---|---|---|---|
+| ens10_hr | +0.026 | [+0.017, +0.036] | 0.000 |
+| ens_hr | +0.011 | [+0.004, +0.020] | 0.001 |
+| tcn_hr | -0.006 | [-0.021, +0.009] | 0.767 |
+| gbdt_hr | -0.175 | [-0.202, -0.149] | 1.000 |
+
+## Night-level agreement (predicted − PSG; bias [95% limits of agreement], averaged over seeds)
+
+| model | TST min | WASO min | sleep efficiency | SOL min |
+|---|---|---|---|---|
+| gbdt_hr | -7.3 [-51.3, +36.6] | +7.0 [-29.8, +43.7] | -2.0% [-13.2%, +9.1%] | +3.3 [-16.3, +22.8] |
+| tcn_hr | -1.5 [-42.0, +39.1] | -0.9 [-34.0, +32.2] | -0.7% [-11.1%, +9.7%] | +3.7 [-15.8, +23.2] |
+| gru_hr | -4.9 [-49.2, +39.3] | -1.2 [-34.5, +32.1] | -1.6% [-14.7%, +11.4%] | +6.4 [-15.7, +28.5] |
+| ens_hr | -1.7 [-41.7, +38.3] | -2.8 [-35.6, +30.0] | -1.0% [-13.0%, +11.1%] | +5.3 [-13.7, +24.2] |
+| ens10_hr | -0.3 [-38.3, +37.7] | -3.6 [-36.6, +29.4] | -0.8% [-13.5%, +12.0%] | +5.2 [-12.9, +23.2] |

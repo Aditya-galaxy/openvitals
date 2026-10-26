@@ -134,3 +134,33 @@ def test_cli_seeds_tag_and_merge(walch_root, tmp_path, capsys):
     assert rep["reference"] == "majority"
     assert next(r for r in rep["results"] if r["model"] == "gbdt_hr")["seeds"] == [0, 1]
     assert "Paired comparison against `majority`" in capsys.readouterr().out
+
+
+def test_restrict_and_compare_reports_on_pooled_kfold(walch_root, bidsleep_root, tmp_path, capsys):
+    common = ["--scheme", "3class", "--models", "majority,gbdt_hr", "--bootstrap", "200",
+              "--cache", str(tmp_path / "cache")]
+    assert cli.main(["bench", f"walch={walch_root}", f"bidsleep={bidsleep_root}", "--split", "kfold", "--k", "4",
+                     "--out", str(tmp_path / "pooled"), *common]) == 0
+    assert cli.main(["bench", f"bidsleep={bidsleep_root}", "--test", f"walch={walch_root}", "--split", "cross",
+                     "--out", str(tmp_path / "cross"), *common]) == 0
+    pooled_path, cross_path = tmp_path / "pooled" / "kfold-3class.json", tmp_path / "cross" / "bidsleep_to_walch-3class.json"
+    pooled, cross = json.loads(pooled_path.read_text()), json.loads(cross_path.read_text())
+
+    walch_only = benchmark.restrict(pooled, "walch", n_boot=200)
+    g = next(r for r in walch_only["results"] if r["model"] == "gbdt_hr")
+    assert g["per_seed"][0]["subjects"] == cross["results"][0]["per_seed"][0]["subjects"]
+    assert all(row["night"].startswith("walch/") for row in g["per_seed"][0]["nights"])
+    assert walch_only["setup"]["split"] == "kfold_walch"
+    with pytest.raises(ValueError, match="no nope subjects"):
+        benchmark.restrict(pooled, "nope")
+
+    same = benchmark.compare_reports(cross, "gbdt_hr", cross, "gbdt_hr", n_boot=200)
+    assert same["delta_kappa"] == 0 and same["n_subjects"] == 8
+    c = benchmark.compare_reports(pooled, "gbdt_hr", cross, "majority", n_boot=200, dataset="walch")
+    assert c["n_subjects"] == 8 and c["delta_kappa"] > 0 and c["reference_kappa"] == pytest.approx(0.0)
+
+    capsys.readouterr()
+    assert cli.main(["compare", f"{pooled_path}:gbdt_hr", f"{cross_path}:gbdt_hr", "--bootstrap", "200"]) == 0
+    assert "on 8 subjects" in capsys.readouterr().out
+    assert cli.main(["merge", str(pooled_path), "--dataset", "walch", "--out", str(tmp_path / "m")]) == 0
+    assert (tmp_path / "m" / "kfold_walch-3class.json").exists()

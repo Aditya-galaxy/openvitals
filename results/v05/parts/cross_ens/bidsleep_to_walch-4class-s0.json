@@ -1,0 +1,1487 @@
+{
+ "openvitals_version": "0.1.0",
+ "python": "3.11.15",
+ "setup": {
+  "split": "bidsleep_to_walch",
+  "k": 5,
+  "seed": 0,
+  "description": "bidsleep (47 subjects, 253 nights); test: walch (31 subjects, 31 nights)",
+  "scheme": "4class",
+  "classes": [
+   "wake",
+   "light",
+   "deep",
+   "rem"
+  ],
+  "folds": [
+   {
+    "name": "bidsleep->walch",
+    "n_train": 253,
+    "n_test": 31
+   }
+  ]
+ },
+ "skipped_models": [],
+ "reference": "ens_hr",
+ "results": [
+  {
+   "model": "ens_hr",
+   "scheme": "4class",
+   "seeds": [
+    0
+   ],
+   "pooled": {
+    "n_epochs": 25962,
+    "accuracy": 0.6307295277713582,
+    "kappa": 0.47821622490632837,
+    "macro_f1": 0.6096920941389219,
+    "per_class": {
+     "wake": {
+      "support": 2244,
+      "sensitivity": 0.5418894830659536,
+      "precision": 0.49592169657422513,
+      "f1": 0.5178875638841567
+     },
+     "light": {
+      "support": 14460,
+      "sensitivity": 0.4883125864453665,
+      "precision": 0.8685116851168512,
+      "f1": 0.6251438689685702
+     },
+     "deep": {
+      "support": 3577,
+      "sensitivity": 0.8328207995526978,
+      "precision": 0.4669278996865204,
+      "f1": 0.5983730039168424
+     },
+     "rem": {
+      "support": 5681,
+      "sensitivity": 0.9010737546206654,
+      "precision": 0.5687777777777778,
+      "f1": 0.6973639397861182
+     }
+    },
+    "confusion": [
+     [
+      1216,
+      375,
+      211,
+      442
+     ],
+     [
+      1056,
+      7061,
+      3086,
+      3257
+     ],
+     [
+      27,
+      389,
+      2979,
+      182
+     ],
+     [
+      153,
+      305,
+      104,
+      5119
+     ]
+    ]
+   },
+   "seed_kappa": {
+    "values": [
+     0.47821622490632837
+    ],
+    "mean": 0.47821622490632837,
+    "sd": 0.0
+   },
+   "ci": {
+    "n_boot": 2000,
+    "level": 0.95,
+    "kappa": [
+     0.4337542778892592,
+     0.5220285833010488
+    ],
+    "accuracy": [
+     0.5995807188978752,
+     0.6612704293677054
+    ],
+    "macro_f1": [
+     0.5760238393215502,
+     0.6407015727603931
+    ],
+    "sensitivity": {
+     "wake": [
+      0.47420883447122686,
+      0.6099017672326118
+     ],
+     "light": [
+      0.4513814376132039,
+      0.5240015225909274
+     ],
+     "deep": [
+      0.7647267316017315,
+      0.8967290032055221
+     ],
+     "rem": [
+      0.8546238309771748,
+      0.9400160246628589
+     ]
+    }
+   },
+   "per_subject": {
+    "n_subjects": 31,
+    "kappa_mean": 0.46644203747633195,
+    "kappa_sd": 0.13208566779601436,
+    "accuracy_mean": 0.625508712967427,
+    "accuracy_sd": 0.09809431990509014
+   },
+   "night_agreement": {
+    "tst_min": {
+     "n": 31,
+     "bias": -3.3548387096774195,
+     "loa_low": -40.837495218051146,
+     "loa_high": 34.12781779869631,
+     "mae": 15.064516129032258
+    },
+    "waso_min": {
+     "n": 31,
+     "bias": -1.0806451612903225,
+     "loa_low": -32.3487342639047,
+     "loa_high": 30.18744394132406,
+     "mae": 12.5
+    },
+    "se": {
+     "n": 31,
+     "bias": -0.013058483478270813,
+     "loa_low": -0.11351320961499548,
+     "loa_high": 0.08739624265845386,
+     "mae": 0.03862222607642975
+    },
+    "sol_min": {
+     "n": 31,
+     "bias": 5.758064516129032,
+     "loa_low": -12.14649519626333,
+     "loa_high": 23.662624228521395,
+     "mae": 8.306451612903226
+    }
+   },
+   "seconds": 1525.2639471249986,
+   "per_seed": [
+    {
+     "seed": 0,
+     "seconds": 1525.2639471249986,
+     "subjects": [
+      "walch/1066528",
+      "walch/1360686",
+      "walch/1449548",
+      "walch/1455390",
+      "walch/1818471",
+      "walch/2598705",
+      "walch/2638030",
+      "walch/3509524",
+      "walch/3997827",
+      "walch/4018081",
+      "walch/4314139",
+      "walch/4426783",
+      "walch/46343",
+      "walch/5132496",
+      "walch/5383425",
+      "walch/5498603",
+      "walch/5797046",
+      "walch/6220552",
+      "walch/759667",
+      "walch/7749105",
+      "walch/781756",
+      "walch/8000685",
+      "walch/8173033",
+      "walch/8258170",
+      "walch/844359",
+      "walch/8530312",
+      "walch/8686948",
+      "walch/8692923",
+      "walch/9106476",
+      "walch/9618981",
+      "walch/9961348"
+     ],
+     "subject_confusions": [
+      [
+       [
+        91,
+        35,
+        12,
+        14
+       ],
+       [
+        19,
+        206,
+        94,
+        47
+       ],
+       [
+        0,
+        11,
+        51,
+        0
+       ],
+       [
+        1,
+        2,
+        5,
+        297
+       ]
+      ],
+      [
+       [
+        66,
+        6,
+        25,
+        20
+       ],
+       [
+        5,
+        178,
+        81,
+        196
+       ],
+       [
+        0,
+        0,
+        155,
+        8
+       ],
+       [
+        0,
+        4,
+        0,
+        204
+       ]
+      ],
+      [
+       [
+        33,
+        38,
+        4,
+        30
+       ],
+       [
+        27,
+        276,
+        176,
+        73
+       ],
+       [
+        0,
+        0,
+        72,
+        0
+       ],
+       [
+        1,
+        0,
+        0,
+        223
+       ]
+      ],
+      [
+       [
+        16,
+        45,
+        17,
+        6
+       ],
+       [
+        17,
+        355,
+        222,
+        97
+       ],
+       [
+        0,
+        0,
+        0,
+        0
+       ],
+       [
+        17,
+        64,
+        0,
+        99
+       ]
+      ],
+      [
+       [
+        5,
+        3,
+        0,
+        2
+       ],
+       [
+        24,
+        269,
+        131,
+        162
+       ],
+       [
+        0,
+        0,
+        113,
+        29
+       ],
+       [
+        7,
+        0,
+        0,
+        213
+       ]
+      ],
+      [
+       [
+        9,
+        3,
+        1,
+        7
+       ],
+       [
+        61,
+        316,
+        94,
+        60
+       ],
+       [
+        0,
+        0,
+        152,
+        0
+       ],
+       [
+        19,
+        69,
+        11,
+        150
+       ]
+      ],
+      [
+       [
+        53,
+        15,
+        21,
+        34
+       ],
+       [
+        7,
+        315,
+        136,
+        75
+       ],
+       [
+        0,
+        9,
+        117,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        166
+       ]
+      ],
+      [
+       [
+        37,
+        6,
+        6,
+        4
+       ],
+       [
+        24,
+        137,
+        95,
+        15
+       ],
+       [
+        0,
+        0,
+        45,
+        0
+       ],
+       [
+        0,
+        4,
+        0,
+        44
+       ]
+      ],
+      [
+       [
+        22,
+        0,
+        0,
+        3
+       ],
+       [
+        63,
+        323,
+        63,
+        104
+       ],
+       [
+        0,
+        0,
+        87,
+        0
+       ],
+       [
+        14,
+        16,
+        0,
+        263
+       ]
+      ],
+      [
+       [
+        56,
+        17,
+        3,
+        15
+       ],
+       [
+        25,
+        73,
+        74,
+        35
+       ],
+       [
+        8,
+        3,
+        166,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        35
+       ]
+      ],
+      [
+       [
+        43,
+        22,
+        24,
+        15
+       ],
+       [
+        22,
+        268,
+        130,
+        178
+       ],
+       [
+        1,
+        17,
+        78,
+        0
+       ],
+       [
+        0,
+        11,
+        13,
+        139
+       ]
+      ],
+      [
+       [
+        54,
+        10,
+        4,
+        2
+       ],
+       [
+        35,
+        293,
+        175,
+        49
+       ],
+       [
+        0,
+        21,
+        34,
+        0
+       ],
+       [
+        6,
+        1,
+        9,
+        287
+       ]
+      ],
+      [
+       [
+        61,
+        4,
+        8,
+        12
+       ],
+       [
+        12,
+        111,
+        46,
+        30
+       ],
+       [
+        0,
+        0,
+        156,
+        0
+       ],
+       [
+        3,
+        7,
+        0,
+        104
+       ]
+      ],
+      [
+       [
+        23,
+        1,
+        4,
+        5
+       ],
+       [
+        27,
+        120,
+        18,
+        115
+       ],
+       [
+        0,
+        1,
+        151,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        0
+       ]
+      ],
+      [
+       [
+        38,
+        0,
+        1,
+        1
+       ],
+       [
+        31,
+        257,
+        56,
+        99
+       ],
+       [
+        4,
+        0,
+        158,
+        62
+       ],
+       [
+        3,
+        5,
+        0,
+        261
+       ]
+      ],
+      [
+       [
+        52,
+        42,
+        9,
+        4
+       ],
+       [
+        42,
+        149,
+        137,
+        54
+       ],
+       [
+        0,
+        44,
+        113,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        98
+       ]
+      ],
+      [
+       [
+        55,
+        11,
+        3,
+        10
+       ],
+       [
+        83,
+        303,
+        67,
+        130
+       ],
+       [
+        0,
+        2,
+        125,
+        2
+       ],
+       [
+        10,
+        1,
+        0,
+        137
+       ]
+      ],
+      [
+       [
+        23,
+        4,
+        0,
+        26
+       ],
+       [
+        38,
+        227,
+        81,
+        234
+       ],
+       [
+        0,
+        57,
+        124,
+        0
+       ],
+       [
+        0,
+        0,
+        0,
+        141
+       ]
+      ],
+      [
+       [
+        12,
+        0,
+        1,
+        5
+       ],
+       [
+        24,
+        31,
+        90,
+        12
+       ],
+       [
+        1,
+        0,
+        138,
+        0
+       ],
+       [
+        4,
+        0,
+        0,
+        157
+       ]
+      ],
+      [
+       [
+        37,
+        3,
+        1,
+        12
+       ],
+       [
+        45,
+        20,
+        34,
+        5
+       ],
+       [
+        7,
+        3,
+        13,
+        2
+       ],
+       [
+        0,
+        3,
+        11,
+        7
+       ]
+      ],
+      [
+       [
+        39,
+        15,
+        21,
+        8
+       ],
+       [
+        39,
+        434,
+        102,
+        65
+       ],
+       [
+        0,
+        0,
+        23,
+        0
+       ],
+       [
+        3,
+        20,
+        28,
+        184
+       ]
+      ],
+      [
+       [
+        19,
+        7,
+        1,
+        6
+       ],
+       [
+        100,
+        361,
+        49,
+        91
+       ],
+       [
+        0,
+        1,
+        65,
+        0
+       ],
+       [
+        0,
+        10,
+        1,
+        246
+       ]
+      ],
+      [
+       [
+        19,
+        3,
+        2,
+        5
+       ],
+       [
+        12,
+        283,
+        120,
+        112
+       ],
+       [
+        0,
+        81,
+        70,
+        42
+       ],
+       [
+        0,
+        0,
+        3,
+        203
+       ]
+      ],
+      [
+       [
+        67,
+        0,
+        17,
+        11
+       ],
+       [
+        2,
+        268,
+        93,
+        85
+       ],
+       [
+        1,
+        8,
+        123,
+        0
+       ],
+       [
+        17,
+        7,
+        3,
+        270
+       ]
+      ],
+      [
+       [
+        43,
+        0,
+        5,
+        45
+       ],
+       [
+        56,
+        157,
+        78,
+        200
+       ],
+       [
+        4,
+        9,
+        90,
+        11
+       ],
+       [
+        0,
+        9,
+        0,
+        190
+       ]
+      ],
+      [
+       [
+        41,
+        16,
+        5,
+        16
+       ],
+       [
+        62,
+        236,
+        104,
+        101
+       ],
+       [
+        0,
+        22,
+        81,
+        0
+       ],
+       [
+        1,
+        4,
+        0,
+        258
+       ]
+      ],
+      [
+       [
+        44,
+        2,
+        2,
+        1
+       ],
+       [
+        33,
+        256,
+        59,
+        228
+       ],
+       [
+        0,
+        49,
+        120,
+        2
+       ],
+       [
+        1,
+        0,
+        0,
+        158
+       ]
+      ],
+      [
+       [
+        61,
+        18,
+        0,
+        31
+       ],
+       [
+        26,
+        250,
+        53,
+        148
+       ],
+       [
+        0,
+        17,
+        124,
+        1
+       ],
+       [
+        22,
+        8,
+        0,
+        177
+       ]
+      ],
+      [
+       [
+        5,
+        1,
+        3,
+        78
+       ],
+       [
+        27,
+        223,
+        140,
+        237
+       ],
+       [
+        0,
+        32,
+        124,
+        3
+       ],
+       [
+        0,
+        7,
+        0,
+        81
+       ]
+      ],
+      [
+       [
+        37,
+        38,
+        6,
+        13
+       ],
+       [
+        40,
+        258,
+        69,
+        146
+       ],
+       [
+        1,
+        1,
+        106,
+        0
+       ],
+       [
+        9,
+        16,
+        2,
+        203
+       ]
+      ],
+      [
+       [
+        55,
+        10,
+        5,
+        1
+       ],
+       [
+        28,
+        108,
+        219,
+        74
+       ],
+       [
+        0,
+        1,
+        5,
+        20
+       ],
+       [
+        15,
+        37,
+        18,
+        124
+       ]
+      ]
+     ],
+     "nights": [
+      {
+       "seed": 0,
+       "night": "walch/1066528/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 885,
+       "kappa": 0.6167137353267588,
+       "true_tst_min": 366.5,
+       "true_waso_min": 46.0,
+       "true_se": 0.8282485875706215,
+       "true_sol_min": 25.0,
+       "pred_tst_min": 387.0,
+       "pred_waso_min": 28.0,
+       "pred_se": 0.8745762711864407,
+       "pred_sol_min": 27.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/1360686/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 948,
+       "kappa": 0.513556927195657,
+       "true_tst_min": 415.5,
+       "true_waso_min": 22.5,
+       "true_se": 0.8765822784810127,
+       "true_sol_min": 36.0,
+       "pred_tst_min": 438.5,
+       "pred_waso_min": 12.5,
+       "pred_se": 0.9251054852320675,
+       "pred_sol_min": 23.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/1449548/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 953,
+       "kappa": 0.4781220383236991,
+       "true_tst_min": 424.0,
+       "true_waso_min": 20.0,
+       "true_se": 0.8898216159496327,
+       "true_sol_min": 9.5,
+       "pred_tst_min": 446.0,
+       "pred_waso_min": 11.5,
+       "pred_se": 0.9359916054564533,
+       "pred_sol_min": 19.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/1455390/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 955,
+       "kappa": 0.15914937341265448,
+       "true_tst_min": 435.5,
+       "true_waso_min": 34.5,
+       "true_se": 0.912041884816754,
+       "true_sol_min": 6.0,
+       "pred_tst_min": 452.5,
+       "pred_waso_min": 19.0,
+       "pred_se": 0.9476439790575916,
+       "pred_sol_min": 6.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/1818471/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 958,
+       "kappa": 0.4590848584640813,
+       "true_tst_min": 474.0,
+       "true_waso_min": 2.5,
+       "true_se": 0.9895615866388309,
+       "true_sol_min": 2.5,
+       "pred_tst_min": 461.0,
+       "pred_waso_min": 10.0,
+       "pred_se": 0.9624217118997912,
+       "pred_sol_min": 8.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/2598705/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 952,
+       "kappa": 0.4888037445869207,
+       "true_tst_min": 466.0,
+       "true_waso_min": 6.5,
+       "true_se": 0.9789915966386554,
+       "true_sol_min": 3.5,
+       "pred_tst_min": 431.5,
+       "pred_waso_min": 33.5,
+       "pred_se": 0.9065126050420168,
+       "pred_sol_min": 11.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/2638030/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 948,
+       "kappa": 0.5534139196114601,
+       "true_tst_min": 412.5,
+       "true_waso_min": 40.0,
+       "true_se": 0.870253164556962,
+       "true_sol_min": 21.5,
+       "pred_tst_min": 444.0,
+       "pred_waso_min": 17.0,
+       "pred_se": 0.9367088607594937,
+       "pred_sol_min": 13.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/3509524/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 417,
+       "kappa": 0.470257785110332,
+       "true_tst_min": 182.0,
+       "true_waso_min": 12.0,
+       "true_se": 0.8729016786570744,
+       "true_sol_min": 14.5,
+       "pred_tst_min": 178.0,
+       "pred_waso_min": 6.5,
+       "pred_se": 0.8537170263788969,
+       "pred_sol_min": 24.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/3997827/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 958,
+       "kappa": 0.5844825368344322,
+       "true_tst_min": 466.5,
+       "true_waso_min": 3.0,
+       "true_se": 0.9739039665970772,
+       "true_sol_min": 9.5,
+       "pred_tst_min": 429.5,
+       "pred_waso_min": 31.0,
+       "pred_se": 0.8966597077244259,
+       "pred_sol_min": 18.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/4018081/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 510,
+       "kappa": 0.5084705831959051,
+       "true_tst_min": 209.5,
+       "true_waso_min": 7.5,
+       "true_se": 0.8215686274509804,
+       "true_sol_min": 10.5,
+       "pred_tst_min": 210.5,
+       "pred_waso_min": 25.5,
+       "pred_se": 0.8254901960784313,
+       "pred_sol_min": 19.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/4314139/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 961,
+       "kappa": 0.35869844973545795,
+       "true_tst_min": 428.5,
+       "true_waso_min": 36.5,
+       "true_se": 0.8917793964620188,
+       "true_sol_min": 11.5,
+       "pred_tst_min": 447.5,
+       "pred_waso_min": 9.5,
+       "pred_se": 0.931321540062435,
+       "pred_sol_min": 21.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/4426783/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 980,
+       "kappa": 0.5365348644740391,
+       "true_tst_min": 455.0,
+       "true_waso_min": 22.0,
+       "true_se": 0.9285714285714286,
+       "true_sol_min": 13.0,
+       "pred_tst_min": 442.5,
+       "pred_waso_min": 27.5,
+       "pred_se": 0.9030612244897959,
+       "pred_sol_min": 20.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/46343/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 554,
+       "kappa": 0.7019587783431962,
+       "true_tst_min": 234.5,
+       "true_waso_min": 8.5,
+       "true_se": 0.8465703971119134,
+       "true_sol_min": 17.0,
+       "pred_tst_min": 239.0,
+       "pred_waso_min": 8.0,
+       "pred_se": 0.8628158844765343,
+       "pred_sol_min": 17.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/5132496/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 465,
+       "kappa": 0.4840675062776165,
+       "true_tst_min": 216.0,
+       "true_waso_min": 5.5,
+       "true_se": 0.9290322580645162,
+       "true_sol_min": 11.0,
+       "pred_tst_min": 207.5,
+       "pred_waso_min": 4.5,
+       "pred_se": 0.8924731182795699,
+       "pred_sol_min": 20.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/5383425/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 976,
+       "kappa": 0.6192058946603467,
+       "true_tst_min": 468.0,
+       "true_waso_min": 10.5,
+       "true_se": 0.9590163934426229,
+       "true_sol_min": 9.5,
+       "pred_tst_min": 450.0,
+       "pred_waso_min": 10.0,
+       "pred_se": 0.9221311475409836,
+       "pred_sol_min": 28.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/5498603/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 744,
+       "kappa": 0.3789977297696835,
+       "true_tst_min": 318.5,
+       "true_waso_min": 48.5,
+       "true_se": 0.8561827956989247,
+       "true_sol_min": 5.0,
+       "pred_tst_min": 325.0,
+       "pred_waso_min": 27.0,
+       "pred_se": 0.8736559139784946,
+       "pred_sol_min": 20.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/5797046/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 939,
+       "kappa": 0.515909763062587,
+       "true_tst_min": 430.0,
+       "true_waso_min": 32.0,
+       "true_se": 0.9158679446219382,
+       "true_sol_min": 7.5,
+       "pred_tst_min": 395.5,
+       "pred_waso_min": 57.5,
+       "pred_se": 0.8423855165069223,
+       "pred_sol_min": 13.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/6220552/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 955,
+       "kappa": 0.3516492672494931,
+       "true_tst_min": 451.0,
+       "true_waso_min": 16.5,
+       "true_se": 0.9445026178010472,
+       "true_sol_min": 9.5,
+       "pred_tst_min": 447.0,
+       "pred_waso_min": 12.0,
+       "pred_se": 0.9361256544502617,
+       "pred_sol_min": 18.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/759667/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 475,
+       "kappa": 0.5937256126112066,
+       "true_tst_min": 228.5,
+       "true_waso_min": 3.0,
+       "true_se": 0.9621052631578947,
+       "true_sol_min": 6.0,
+       "pred_tst_min": 217.0,
+       "pred_waso_min": 8.5,
+       "pred_se": 0.9136842105263158,
+       "pred_sol_min": 12.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/7749105/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 203,
+       "kappa": 0.18683834048640913,
+       "true_tst_min": 75.0,
+       "true_waso_min": 1.5,
+       "true_se": 0.7389162561576355,
+       "true_sol_min": 17.5,
+       "pred_tst_min": 57.0,
+       "pred_waso_min": 24.0,
+       "pred_se": 0.5615763546798029,
+       "pred_sol_min": 20.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/781756/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 981,
+       "kappa": 0.5004390261233231,
+       "true_tst_min": 449.0,
+       "true_waso_min": 15.0,
+       "true_se": 0.9153924566768603,
+       "true_sol_min": 26.5,
+       "pred_tst_min": 450.0,
+       "pred_waso_min": 23.0,
+       "pred_se": 0.9174311926605505,
+       "pred_sol_min": 17.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/8000685/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 957,
+       "kappa": 0.5673186750428325,
+       "true_tst_min": 462.0,
+       "true_waso_min": 8.5,
+       "true_se": 0.9655172413793104,
+       "true_sol_min": 8.0,
+       "pred_tst_min": 419.0,
+       "pred_waso_min": 11.5,
+       "pred_se": 0.8756530825496343,
+       "pred_sol_min": 45.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/8173033/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 955,
+       "kappa": 0.4006705091575697,
+       "true_tst_min": 463.0,
+       "true_waso_min": 5.5,
+       "true_se": 0.9696335078534032,
+       "true_sol_min": 9.0,
+       "pred_tst_min": 462.0,
+       "pred_waso_min": 2.5,
+       "pred_se": 0.9675392670157068,
+       "pred_sol_min": 13.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/8258170/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 972,
+       "kappa": 0.6459550278333017,
+       "true_tst_min": 438.5,
+       "true_waso_min": 6.5,
+       "true_se": 0.9022633744855967,
+       "true_sol_min": 41.0,
+       "pred_tst_min": 442.5,
+       "pred_waso_min": 10.0,
+       "pred_se": 0.9104938271604939,
+       "pred_sol_min": 33.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/844359/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 897,
+       "kappa": 0.3772378623076807,
+       "true_tst_min": 402.0,
+       "true_waso_min": 33.5,
+       "true_se": 0.8963210702341137,
+       "true_sol_min": 11.0,
+       "pred_tst_min": 397.0,
+       "pred_waso_min": 38.5,
+       "pred_se": 0.8851727982162765,
+       "pred_sol_min": 13.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/8530312/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 947,
+       "kappa": 0.502976209352623,
+       "true_tst_min": 434.5,
+       "true_waso_min": 25.5,
+       "true_se": 0.9176346356916578,
+       "true_sol_min": 13.5,
+       "pred_tst_min": 421.5,
+       "pred_waso_min": 22.5,
+       "pred_se": 0.8901795142555439,
+       "pred_sol_min": 17.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/8686948/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 955,
+       "kappa": 0.4361846566306853,
+       "true_tst_min": 453.0,
+       "true_waso_min": 9.0,
+       "true_se": 0.9486910994764398,
+       "true_sol_min": 15.5,
+       "pred_tst_min": 438.5,
+       "pred_waso_min": 14.5,
+       "pred_se": 0.9183246073298429,
+       "pred_sol_min": 24.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/8692923/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 936,
+       "kappa": 0.5150197021646794,
+       "true_tst_min": 413.0,
+       "true_waso_min": 46.0,
+       "true_se": 0.8824786324786325,
+       "true_sol_min": 9.0,
+       "pred_tst_min": 413.5,
+       "pred_waso_min": 27.5,
+       "pred_se": 0.8835470085470085,
+       "pred_sol_min": 16.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/9106476/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 961,
+       "kappa": 0.25190963493942686,
+       "true_tst_min": 437.0,
+       "true_waso_min": 41.5,
+       "true_se": 0.9094693028095734,
+       "true_sol_min": 2.0,
+       "pred_tst_min": 464.5,
+       "pred_waso_min": 8.5,
+       "pred_se": 0.9667013527575442,
+       "pred_sol_min": 7.5
+      },
+      {
+       "seed": 0,
+       "night": "walch/9618981/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 945,
+       "kappa": 0.4812991143718994,
+       "true_tst_min": 425.5,
+       "true_waso_min": 40.0,
+       "true_se": 0.9005291005291005,
+       "true_sol_min": 7.0,
+       "pred_tst_min": 429.0,
+       "pred_waso_min": 22.5,
+       "pred_se": 0.9079365079365079,
+       "pred_sol_min": 21.0
+      },
+      {
+       "seed": 0,
+       "night": "walch/9961348/1",
+       "fold": "bidsleep->walch",
+       "n_epochs": 720,
+       "kappa": 0.22105103511033591,
+       "true_tst_min": 324.5,
+       "true_waso_min": 18.0,
+       "true_se": 0.9013888888888889,
+       "true_sol_min": 14.0,
+       "pred_tst_min": 311.0,
+       "pred_waso_min": 30.5,
+       "pred_se": 0.8638888888888889,
+       "pred_sol_min": 12.5
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "comparisons": []
+}

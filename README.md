@@ -8,7 +8,7 @@ sensor data, but each one reinvents sleep staging and recovery scoring with no
 published accuracy. OpenVitals is a shared, device-agnostic library with
 numbers attached.
 
-**Status:** v0.4 – baselines, whole-night sequence models, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets; see [RESULTS.md](RESULTS.md). Not a medical device; for
+**Status:** v0.5 – baselines, whole-night sequence models and ensembles, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets, pooled training on all 253 BIDSleep HR nights + Walch; see [RESULTS.md](RESULTS.md). Not a medical device; for
 wellness and research use only.
 
 ## Benchmark rules
@@ -60,6 +60,13 @@ uv run openvitals merge results/kfold-4class-s*.json --reference gbdt_hr --out r
 Each JSON report keeps one confusion matrix per test subject per seed, so merging is exact,
 and comparisons against a different reference can be recomputed without retraining.
 
+```bash
+# a pooled k-fold (Walch + BIDSleep) scored on its Walch test subjects only
+uv run openvitals merge results/pooled/kfold-4class-s*.json --dataset walch --out results/merged
+# paired Δ between models in two reports (e.g. trained on more nights), on their shared test subjects
+uv run openvitals compare results/new.json:gru_hr results/old.json:gru_hr --dataset walch
+```
+
 ### Sequence models and ONNX
 
 ```bash
@@ -67,6 +74,9 @@ uv sync --extra seq                                   # torch, onnx, onnxruntime
 uv run openvitals bench walch=data/walch --models tcn_motion_hr,gru_motion_hr --split loso
 uv run openvitals export walch=data/walch --model tcn_motion_hr --scheme 4class --out tcn.onnx
 ```
+
+`ens_hr` / `ens_motion_hr` average the softmax of a TCN and a GRU trained with the same seed
+(not ONNX-exportable yet).
 
 The ONNX graph takes raw `features.extract` output, shape `(1, epochs, n_features)`,
 with standardisation inside. Feature order and class names are in the model metadata.

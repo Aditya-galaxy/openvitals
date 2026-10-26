@@ -176,6 +176,41 @@ class SequenceModel:
         return metrics.cohen_kappa(metrics.confusion(np.concatenate(ys), np.concatenate(ps), self.n_classes_))
 
 
+class Ensemble:
+    """TCN and GRU trained with the same seed; predicts the argmax of their mean
+    softmax. The two architectures win on different training-set sizes (v0.3), so
+    their errors are partly independent. Each member is exactly the matching
+    single model, so a paired Δ against `tcn_*` / `gru_*` isolates the averaging."""
+
+    schemes = tuple(stages.SCHEMES)
+
+    def __init__(self, inputs: str = "hr", archs: tuple[str, ...] = ARCHS, seed: int = 0, n_seeds: int = 1, **kw):
+        # n_seeds > 1: member seeds seed*n_seeds .. seed*n_seeds + n_seeds - 1 per arch, so
+        # ens10 at seed 0 averages exactly the seed 0-4 TCNs and GRUs of a 5-seed run.
+        seeds = range(seed * n_seeds, (seed + 1) * n_seeds)
+        self.members = [SequenceModel(a, inputs, seed=s, **kw) for a in archs for s in seeds]
+        size = f"{len(self.members)}" if n_seeds > 1 else ""
+        self.name = f"ens{size}_{inputs.replace('+', '_')}"
+
+    def fit(self, nights: list[Night], scheme: str) -> "Ensemble":
+        for m in self.members:
+            m.fit(nights, scheme)
+        return self
+
+    def predict(self, night: Night) -> np.ndarray:
+        if night.n_epochs == 0:
+            return np.empty(0, dtype=np.int8)
+        return self.predict_proba(night).argmax(1).astype(np.int8)
+
+    def predict_proba(self, night: Night) -> np.ndarray:
+        probs = []
+        for m in self.members:
+            z = m.predict_logits(night)
+            e = np.exp(z - z.max(1, keepdims=True))
+            probs.append(e / e.sum(1, keepdims=True))
+        return np.mean(probs, axis=0)
+
+
 def _build(arch: str, n_in: int, hidden: int, n_out: int, dropout: float):
     import torch
     from torch import nn
