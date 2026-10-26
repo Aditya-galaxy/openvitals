@@ -48,14 +48,20 @@ def load_subject(path: Path) -> list[Night]:
 
 
 def load_dataset(root: Path, dataset: str) -> list[Night]:
-    paths = sorted((Path(root) / dataset).glob("*.pkl"))
+    paths = _feature_files(root, dataset)
     if not paths:
         raise FileNotFoundError(f"no feature files in {Path(root) / dataset}")
     return [n for p in paths for n in load_subject(p)]
 
 
 def done_subjects(root: Path, dataset: str) -> set[str]:
-    return {p.stem for p in (Path(root) / dataset).glob("*.pkl")}
+    return {p.stem for p in _feature_files(root, dataset)}
+
+
+def _feature_files(root: Path, dataset: str) -> list[Path]:
+    """Subject files only: skips hidden files such as macOS '._*' AppleDouble stubs,
+    which tar on macOS adds to archives and which aren't pickles."""
+    return sorted(p for p in (Path(root) / dataset).glob("*.pkl") if not p.name.startswith("."))
 
 
 def has_motion(path: Path) -> bool:

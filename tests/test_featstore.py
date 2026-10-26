@@ -171,3 +171,11 @@ def test_stale_claim_blocks_until_cleared(walch_dir, tmp_path):
     assert "1002" not in done and len(done) == 7
     featstore.clear_claims(feat, "walch")
     assert featstore.featurize("walch", walch_dir.parent, feat, claim=True, log=lambda m: None) == ["1002"]
+
+
+def test_hidden_files_in_feature_store_are_ignored(walch_dir, tmp_path):
+    feat = tmp_path / "feat"
+    featstore.featurize("walch", walch_dir.parent, feat, log=lambda m: None)
+    (feat / "walch" / "._1000.pkl").write_bytes(b"\x00\x05\x16\x07\x00\x02\x00\x00Mac OS X")  # AppleDouble stub
+    assert len(featstore.load_dataset(feat, "walch")) == 8
+    assert "._1000" not in featstore.done_subjects(feat, "walch")

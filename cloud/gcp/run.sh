@@ -28,11 +28,13 @@ if [ "${SKIP_FEATURIZE:-0}" = 1 ]; then rc=0; else
   # so none sits idle while another still has a backlog (fixed lists left one worker
   # with 5 subjects while another had finished).
   .venv/bin/python -c "from openvitals import featstore; featstore.clear_claims('feat', 'bidsleep')"  # stale, from a killed run
+  pids=()
   for ((g = 0; g < WORKERS; g++)); do
     $OV featurize bidsleep --data-dir data --features feat --download --evict --workers 3 \
       --max-nights "$MAX_NIGHTS" --claim >> "logs/featurize-$g.log" 2>&1 &
+    pids+=($!)
   done
-  wait
+  wait "${pids[@]}"  # only the workers: a bare `wait` also waits on the endless sync loop
   # Final pass over every subject retries anything a worker failed on, and sets rc.
   $OV featurize bidsleep --data-dir data --features feat --download --evict --workers 3 \
     --max-nights "$MAX_NIGHTS" >> logs/featurize.log 2>&1

@@ -12,7 +12,8 @@ gcloud compute instances describe "$VM" --zone "$ZONE" --project "$PROJECT" >/de
     --image-family debian-12 --image-project debian-cloud --boot-disk-size 60GB --boot-disk-type pd-balanced \
     --scopes storage-rw --labels app=openvitals
 (cd "$ROOT" && uv build -q --wheel --out-dir "$TMP")
-tar -C "$ROOT" -czf "$TMP/feat-walch.tgz" feat/walch
+# No macOS metadata: otherwise tar adds '._*' AppleDouble stubs next to every file.
+COPYFILE_DISABLE=1 tar --no-xattrs -C "$ROOT" -czf "$TMP/feat-walch.tgz" feat/walch
 for i in 1 2 3 4 5 6; do gcloud compute ssh "$VM" --zone "$ZONE" --project "$PROJECT" --quiet --command "mkdir -p ov" && break; sleep 10; done
 gcloud compute scp --zone "$ZONE" --project "$PROJECT" --quiet "$TMP"/openvitals-*.whl "$TMP/feat-walch.tgz" \
   "$ROOT/cloud/gcp/run.sh" "$ROOT/cloud/gcp/setup_vm.sh" "$VM:ov/"
