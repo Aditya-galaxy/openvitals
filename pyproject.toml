@@ -5,6 +5,18 @@ description = "Open, validated sleep and recovery algorithms for wrist wearables
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Aditya-galaxy" }]
+keywords = ["sleep", "sleep-staging", "wearables", "heart-rate", "hypnogram", "apple-health", "gadgetbridge", "onnx"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
 dependencies = [
     "numpy>=1.26",
     "pandas>=2.1",
@@ -35,6 +47,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/openvitals"]
+
+[tool.hatch.build.targets.sdist]
+# Code, tests and docs only: benchmark JSONs, feature stores, notebooks and cloud
+# scripts stay in the repository.
+include = ["src/openvitals", "tests", "scripts", "docs", "README.md", "RESULTS.md", "LICENSE", "NOTICE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
