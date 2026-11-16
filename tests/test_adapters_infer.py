@@ -174,3 +174,59 @@ def test_minute_level_hr_covers_every_epoch_but_real_gaps_do_not(walch_root, mod
     res = Stager(model_path).stage(night, trim=False)
     assert (res.stage[3 * 120 + 30: 4 * 120 - 30] == stages.UNKNOWN).all()
     assert (res.stage[: 3 * 120 - 5] >= 0).all()
+
+
+def _night_csv(walch_root, path):
+    _, _, t, bpm = _evening_padded_samples(walch_root)
+    path.write_text("time,hr\n" + "\n".join(f"{datetime.fromtimestamp(x, IST).isoformat()},{b:.1f}"
+                                            for x, b in zip(t, bpm)) + "\n")
+    return t
+
+
+def test_cli_stage_reports_resting_hr_and_hrv_from_ibi(walch_root, model_path, tmp_path, capsys):
+    from openvitals import cli
+
+    t = _night_csv(walch_root, tmp_path / "hr.csv")
+    rng = np.random.default_rng(1)
+    ibi = 1000 + rng.normal(0, 35, int((t[-1] - t[0]) / 1.0))        # beats across the whole recording
+    beat_t = t[0] + np.cumsum(ibi) / 1000
+    (tmp_path / "rr.csv").write_text("time,rr_ms\n" + "\n".join(
+        f"{datetime.fromtimestamp(x, IST).isoformat()},{v:.1f}" for x, v in zip(beat_t, ibi)) + "\n")
+    out = tmp_path / "out"
+    assert cli.main(["stage", "--csv", str(tmp_path / "hr.csv"), "--ibi", str(tmp_path / "rr.csv"),
+                     "--tz", "Asia/Kolkata", "--model", str(model_path), "--out", str(out)]) == 0
+    printed = capsys.readouterr().out
+    assert "resting HR" in printed and "HRV (RMSSD)" in printed and "beat intervals" in printed
+    rec = json.loads((out / "2026-11-10.json").read_text())["recovery"]
+    assert rec["hrv"]["n_windows"] > 10 and 35 < rec["hrv"]["rmssd_ms"] < 65   # iid N(0,35): RMSSD ~ 49
+    assert rec["resting_hr"]["lowest_hr_5min"] < rec["resting_hr"]["avg_sleep_hr"]
+    header = (out / "nights.csv").read_text().splitlines()[0]
+    assert "resting_hr" in header and "hrv_rmssd_ms" in header
+
+
+def test_cli_stage_apple_health_hrv_readings(walch_root, model_path, tmp_path, capsys):
+    from openvitals import cli
+
+    _, _, t, bpm = _evening_padded_samples(walch_root)
+    fmt = lambda x: datetime.fromtimestamp(x, IST).strftime("%Y-%m-%d %H:%M:%S %z")  # noqa: E731
+    recs = [f'<Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Watch" startDate="{fmt(x)}" '
+            f'endDate="{fmt(x)}" value="{b:.0f}"/>' for x, b in zip(t, bpm)]
+    rng = np.random.default_rng(2)
+    for h in (1.5, 2.5, 3.5, 4.5):                                      # readings during the night
+        s0 = t[0] + 3 * 3600 + h * 3600
+        beat_times = s0 + np.cumsum(1.0 + rng.normal(0, 0.03, 60))
+        kids = "".join(f'<InstantaneousBeatsPerMinute bpm="{60 / d:.0f}" '
+                       f'time="{datetime.fromtimestamp(x, IST).strftime("%I:%M:%S.%f")[:-4]} '
+                       f'{datetime.fromtimestamp(x, IST).strftime("%p")}"/>'
+                       for x, d in zip(beat_times[1:], np.diff(beat_times)))
+        recs.append(f'<Record type="HKQuantityTypeIdentifierHeartRateVariabilitySDNN" sourceName="Watch" '
+                    f'unit="ms" startDate="{fmt(s0)}" endDate="{fmt(s0 + 60)}" value="31.0">'
+                    f"<HeartRateVariabilityMetadataList>{kids}</HeartRateVariabilityMetadataList></Record>")
+    with zipfile.ZipFile(tmp_path / "export.zip", "w") as z:
+        z.writestr("apple_health_export/export.xml", "<HealthData>" + "".join(recs) + "</HealthData>")
+    out = tmp_path / "out"
+    assert cli.main(["stage", "--apple-health", str(tmp_path / "export.zip"), "--tz", "Asia/Kolkata",
+                     "--model", str(model_path), "--out", str(out)]) == 0
+    rec = json.loads((out / "2026-11-10.json").read_text())["recovery"]
+    assert rec["hrv"]["source"] == "Apple Health HRV readings" and rec["hrv"]["n_readings"] >= 2
+    assert rec["hrv"]["apple_sdnn_ms"] == 31.0 and rec["hrv"]["rmssd_ms"] > 10

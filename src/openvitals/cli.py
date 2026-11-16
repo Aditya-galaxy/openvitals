@@ -104,6 +104,7 @@ def main(argv: list[str] | None = None) -> int:
     st.add_argument("--night", help="only the night starting on this date (YYYY-MM-DD)")
     st.add_argument("--whole", action="store_true", help="treat all samples as one night (no windowing)")
     st.add_argument("--no-trim", action="store_true", help="stage the full window; skip sleep-period detection")
+    st.add_argument("--ibi", type=Path, help="beat-interval CSV (e.g. chest strap) for HRV, with times")
     st.add_argument("--model", type=Path, help="ONNX model (default: bundled HR-only 4-class ensemble)")
     st.add_argument("--out", type=Path, help="write <date>.csv / <date>.json per night and nights.csv here")
 
@@ -183,7 +184,7 @@ def _stage(a) -> int:
 
     from zoneinfo import ZoneInfo
 
-    from . import adapters
+    from . import adapters, recovery
     from .infer import Stager, night_from_samples
 
     if a.csv:
@@ -206,6 +207,8 @@ def _stage(a) -> int:
     if not windows:
         raise SystemExit("no night with at least 3 h of heart-rate data in the window"
                          + (f" on {a.night}" if a.night else "") + "; try --whole or --window")
+    beats = adapters.read_ibi_csv(a.ibi) if a.ibi else None
+    sessions = adapters.read_apple_health_hrv(a.apple_health, source=a.source)["sessions"] if a.apple_health else None
     stager = Stager(a.model)
     print(f"model: {stager.meta.get('model', stager.path.name)} ({stager.inputs}, {stager.scheme}) | "
           f"{len(t)} HR samples | {len(windows)} night(s) | timezone {tzname}", file=sys.stderr)
@@ -216,12 +219,22 @@ def _stage(a) -> int:
         sel = (t >= start) & (t < end)
         res = stager.stage(night_from_samples(t[sel], hr[sel], start=start, end=end, night_id=str(d)),
                            trim=not a.no_trim)
+        rec = recovery.night_recovery(res, t[sel], hr[sel], beats=beats, apple_sessions=sessions)
         info = res.to_dict(tz=tz)
+        info["recovery"] = rec
         s = res.summary
         print(f"\n{d}  {info['start'][11:16]}–{info['end'][11:16]}  "
               f"asleep {s.get('tst_min', 0) / 60:.1f} h  efficiency {s.get('se', 0):.0%}  "
               f"onset {s.get('sol_min', 0):.0f} min  WASO {s.get('waso_min', 0):.0f} min  | "
               + "  ".join(f"{c} {s.get(c + '_min', 0):.0f}m" for c in res.classes if c != "wake"))
+        rhr, hrv = rec["resting_hr"], rec["hrv"]
+        line = []
+        if rhr["lowest_hr_5min"] is not None:
+            line.append(f"resting HR {rhr['lowest_hr_5min']:.0f} bpm (lowest 5 min), avg asleep {rhr['avg_sleep_hr']:.0f}")
+        if hrv and hrv.get("rmssd_ms"):
+            line.append(f"HRV (RMSSD) {hrv['rmssd_ms']:.0f} ms from {hrv['source']}")
+        if line:
+            print("  " + " | ".join(line))
         print(res.hypnogram())
         for w in res.warnings:
             print(f"  warning: {w}")
@@ -229,7 +242,10 @@ def _stage(a) -> int:
             res.to_csv(a.out / f"{d}.csv", tz=tz)
             (a.out / f"{d}.json").write_text(json.dumps(info, indent=1))
         rows.append({"night": str(d), "start": info["start"], "end": info["end"],
-                     **{k: round(v, 3) for k, v in s.items()}, "warnings": " | ".join(res.warnings)})
+                     **{k: round(v, 3) for k, v in s.items()},
+                     "resting_hr": _r(rhr["lowest_hr_5min"]), "avg_sleep_hr": _r(rhr["avg_sleep_hr"]),
+                     "hrv_rmssd_ms": _r(hrv.get("rmssd_ms") if hrv else None),
+                     "warnings": " | ".join(res.warnings)})
     if a.out:
         keys = list(dict.fromkeys(k for r in rows for k in r))
         lines = [",".join(keys)] + [",".join(f'"{r.get(k, "")}"' if k == "warnings" else str(r.get(k, ""))
@@ -238,6 +254,10 @@ def _stage(a) -> int:
         print(f"\nwrote {len(rows)} night(s) to {a.out}/", file=sys.stderr)
     print("\nNot a medical device: estimates for wellness and research use only.", file=sys.stderr)
     return 0
+
+
+def _r(x, nd: int = 1):
+    return "" if x is None else round(x, nd)
 
 
 def _local_tz() -> str:

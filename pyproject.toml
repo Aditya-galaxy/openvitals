@@ -1,6 +1,6 @@
 [project]
 name = "openvitals"
-version = "0.6.0"
+version = "0.7.0"
 description = "Open, validated sleep and recovery algorithms for wrist wearables, with a reproducible benchmark."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -39,6 +39,7 @@ openvitals = "openvitals.cli:main"
 dev = [
     "ipykernel>=7.3.0",
     "pytest>=8",
+    "wfdb>=4.3.1",
 ]
 
 [build-system]

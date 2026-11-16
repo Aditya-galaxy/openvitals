@@ -8,7 +8,7 @@ sensor data, but each one reinvents sleep staging and recovery scoring with no
 published accuracy. OpenVitals is a shared, device-agnostic library with
 numbers attached.
 
-**Status:** v0.6 – `openvitals stage` for your own nights (Apple Health, Gadgetbridge, CSV) with a bundled HR-only model; baselines, whole-night sequence models and ensembles, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets, pooled training on all 253 BIDSleep HR nights + Walch; see [RESULTS.md](RESULTS.md). Not a medical device; for
+**Status:** v0.7 – overnight resting heart rate and HRV (validated against ECG); `openvitals stage` for your own nights (Apple Health, Gadgetbridge, CSV) with a bundled HR-only model; baselines, whole-night sequence models and ensembles, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets, pooled training on all 253 BIDSleep HR nights + Walch; see [RESULTS.md](RESULTS.md). Not a medical device; for
 wellness and research use only.
 
 ## Stage your own nights
@@ -26,6 +26,11 @@ hypnogram and night totals. With `--out` it writes `<date>.csv` (per-epoch stage
 `<date>.json` and `nights.csv`. The bundled model is the heart-rate-only 10-model TCN + GRU
 ensemble, which runs on numpy + onnxruntime (no torch). Accuracy, training data and limits are in
 [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). **Not a medical device.**
+
+Each night also gets **resting heart rate** (lowest 5 minutes asleep) and **average sleeping heart
+rate**. With beat-to-beat data, it gets **HRV (RMSSD)** too: pass a chest-strap export with
+`--ibi beats.csv` (e.g. Polar Sensor Logger), or use an Apple Health export, whose HRV readings are
+read automatically. Methods and validation are in [`docs/RECOVERY.md`](docs/RECOVERY.md).
 
 From Python:
 
@@ -162,7 +167,8 @@ src/openvitals/
   download.py    PhysioNet fetch with checksum verification
   featstore.py   per-subject feature files; streaming featurize
   infer.py       Stager: stage unlabelled nights with an exported ONNX model
-  adapters.py    CSV, Apple Health and Gadgetbridge readers; split_nights
+  adapters.py    CSV, Apple Health and Gadgetbridge readers (HR, HRV, beat intervals); split_nights
+  recovery.py    resting heart rate, beat cleaning, RMSSD, nightly HRV
   assets/        bundled release model (stager_hr_4class.onnx)
 ```
 

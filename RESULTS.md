@@ -6,6 +6,23 @@ v0.1 below: Walch has motion + HR; BIDSleep is **HR only** locally, so every BID
 number here is HR-only. [`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)
 fills in motion on Colab.
 
+## v0.7: overnight resting heart rate and HRV (2026-11-16)
+
+Full method and tables: [`docs/RECOVERY.md`](docs/RECOVERY.md).
+
+- **HRV (RMSSD) against ECG** (`nsr2db`, 54 adults, manually reviewed beats). Beat cleaning cuts the
+  error from real ectopic beats to 2.2% median (15.5% at the 90th percentile; 58.4% uncleaned), and
+  keeps it at 2–4% with up to 5% injected missed, extra or ectopic beats (230–640% uncleaned).
+  **Beat-timing jitter is the binding limit:** 5 / 10 / 15 ms costs 5 / 14 / 30%. Apple-style sparse
+  readings: 6 one-minute readings per night give 9.6% median error, ρ 0.90 across people.
+- **Resting heart rate.** Using predicted instead of PSG sleep moves it by +0.08 bpm [−1.28, +1.43]
+  (Walch, held-out model), and by +0.15 bpm with once-a-minute heart rate. Night-to-night ICC is 0.69
+  and within-person SD 3.4 bpm (BIDSleep, 47 people, 253 nights).
+- **Not yet validated:** wrist-PPG-derived HRV on real paired PPG + ECG (needs DREAMT), and the Apple
+  Health beat-series reader on a real export.
+
+---
+
 ## v0.5: all 253 HR nights, pooled training, and ensembles (2026-10-26)
 
 v0.4 concluded that more heart-rate nights beat motion. v0.5 tests that at full scale, locally,
