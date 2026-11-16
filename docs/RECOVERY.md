@@ -1,4 +1,4 @@
-# Overnight resting heart rate and HRV (OpenVitals 0.7.0)
+# Overnight resting heart rate, HRV and recovery score (OpenVitals 0.8.0)
 
 **Not a medical device.** Wellness and research use only.
 
@@ -89,6 +89,36 @@ About 70% of the variation is between people, so a single night's value reliably
 person. Night-to-night swings of about 3–4 bpm are normal (some of it is real: alcohol, late meals,
 illness, training), so compare against your own recent baseline, not a single night.
 
+## Recovery score
+
+A daily number from 0 to 100, where **50 means normal for you**. It's a transparent formula, not a
+trained model, because there's no ground truth for "recovery".
+
+1. For each measure, tonight is compared with **your previous 28 nights** (never later ones, so a
+   past score never changes). A measure needs at least 7 earlier nights before it counts.
+2. Each comparison is a standard score: (tonight − your average) ÷ your usual spread, clipped to
+   ±3. Lower resting heart rate counts as better. The spread has a floor (HRV 0.05 ln-units, resting
+   heart rate 1 bpm, sleep 20 min) so a very steady history can't trigger false alarms.
+3. Weighted average: **HRV (ln RMSSD) 50%, resting heart rate 30%, total sleep time 20%**,
+   re-weighted when a measure is missing. There's no score without HRV or resting heart rate.
+4. Score = 50 + average × 50/3, so +3 → 100 and −3 → 0. Bands: **low < 35 ≤ normal < 65 ≤ high**.
+5. Each score comes with plain words, e.g. *"HRV 29% below your average; resting HR +5.0 bpm vs your
+   average; sleep −86 min vs your average"*.
+
+`openvitals stage` scores every night in an export, and `openvitals trend nights.csv …` rescores
+saved results (several exports can be combined; later files win per night).
+
+**How to read it.** It answers "is tonight unusual *for me*?", not "am I healthy?". A low score
+after a hard workout, late alcohol, illness or poor sleep is the expected signal. A single low
+night matters less than several in a row. It isn't comparable between people, and it means nothing
+for the first week (not enough history).
+
+**What's checked.** Unit tests confirm a stress night (HRV −29%, resting heart rate +5 bpm, 86 min
+less sleep) scores low with the right explanation, ordinary nights stay around 50, scores never use
+future nights, and flat histories don't alarm. Its *usefulness* (does it track how people feel and
+perform?) can only be shown on real multi-week data. None of the open datasets have enough nights
+per person.
+
 ## Limitations
 
 - **The HRV ground truth is 24-hour Holter**, not polysomnography. The "night" is the lowest-heart-
@@ -99,9 +129,6 @@ illness, training), so compare against your own recent baseline, not a single ni
 - **Apple Health beat data is parsed best-effort.** Apple publishes no schema for `export.xml`,
   and the reader hasn't yet been checked against a real export. Unparseable readings fall back to
   Apple's own SDNN value, which is reported separately.
-- **No recovery score yet.** A personal-baseline recovery score (tonight's HRV and resting heart
-  rate against your last few weeks) is the next step. It can't be validated against ground truth,
-  so it will be a transparent formula, not an "accuracy" claim.
 
 Data licences and citations: see `NOTICE`. `nsr2db` is used for validation only and is not part of
 the package.

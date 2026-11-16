@@ -113,3 +113,63 @@ def test_apple_health_hrv_formats_and_midnight(tmp_path):
     assert s0["beat_t"][2] == pytest.approx(expect)                 # crossed midnight onto the next day
     assert s0["ibi_ms"][0] == pytest.approx(1000.0)
     assert out["sessions"][1]["ibi_ms"].tolist() == pytest.approx([60000 / 55, 60000 / 54, 60000 / 56])
+
+
+# -- recovery score ---------------------------------------------------------------
+
+def _history(n=20, seed=0, start_day=1):
+    rng = np.random.default_rng(seed)
+    return [{"night": f"2026-10-{d:02d}", "hrv_rmssd_ms": 45 * np.exp(rng.normal(0, 0.1)),
+             "resting_hr": 55 + rng.normal(0, 1.5), "tst_min": 440 + rng.normal(0, 30)}
+            for d in range(start_day, start_day + n)]
+
+
+def test_score_normal_nights_near_50_and_stress_night_low():
+    nights = _history() + [{"night": "2026-10-21", "hrv_rmssd_ms": 32, "resting_hr": 60, "tst_min": 360}]
+    s = recovery.recovery_scores(nights)
+    normal = [r["recovery_score"] for r in s[7:-1]]
+    assert all(20 < x < 80 for x in normal) and 40 < np.median(normal) < 60
+    last = s[-1]
+    assert last["recovery_score"] < 20 and last["band"] == "low"
+    assert "HRV" in last["note"] and "below" in last["note"] and "resting HR +" in last["note"]
+
+
+def test_score_needs_history_and_never_uses_future_nights():
+    s = recovery.recovery_scores(_history(10))
+    assert all(r["recovery_score"] is None for r in s[:7]) and s[7]["recovery_score"] is not None
+    assert "needs 7 earlier nights" in s[0]["note"]
+    longer = recovery.recovery_scores(_history(10) + _history(10, seed=5, start_day=11))
+    assert [r["recovery_score"] for r in longer[:10]] == [r["recovery_score"] for r in s]  # no leakage
+
+
+def test_score_without_hrv_and_sleep_alone():
+    no_hrv = [{**r, "hrv_rmssd_ms": None} for r in _history()]
+    s = recovery.recovery_scores(no_hrv)[-1]
+    assert s["recovery_score"] is not None and s["hrv_z"] is None and s["rhr_z"] is not None
+    sleep_only = [{"night": r["night"], "tst_min": r["tst_min"]} for r in _history()]
+    assert recovery.recovery_scores(sleep_only)[-1]["recovery_score"] is None
+
+
+def test_flat_history_does_not_alarm():
+    flat = [{"night": f"2026-10-{d:02d}", "hrv_rmssd_ms": 40, "resting_hr": 55, "tst_min": 450} for d in range(1, 11)]
+    flat.append({"night": "2026-10-11", "hrv_rmssd_ms": 41, "resting_hr": 55.5, "tst_min": 440})
+    s = recovery.recovery_scores(flat)[-1]
+    assert 35 < s["recovery_score"] < 65 and s["band"] == "normal"
+
+
+def test_trend_cli_merges_files_and_roundtrips_csv(tmp_path, capsys):
+    import csv
+
+    from openvitals import cli
+
+    keys = ["night", "tst_min", "resting_hr", "hrv_rmssd_ms"]
+    hist = _history(15)
+    for name, part in (("a.csv", hist[:10]), ("b.csv", hist[8:])):          # nights 9-10 overlap
+        (tmp_path / name).write_text("\n".join([",".join(keys)] + [",".join(str(r[k]) for k in keys) for r in part]) + "\n")
+    out = tmp_path / "trend.csv"
+    assert cli.main(["trend", str(tmp_path / "a.csv"), str(tmp_path / "b.csv"), "--out", str(out)]) == 0
+    printed = capsys.readouterr().out
+    assert printed.splitlines()[0].startswith("night") and "2026-10-15" in printed
+    rows = list(csv.DictReader(open(out)))
+    assert [r["night"] for r in rows] == [r["night"] for r in hist]          # deduplicated, in order
+    assert rows[-1]["recovery_score"] and "your average" in rows[-1]["recovery_note"]

@@ -1,6 +1,6 @@
 [project]
 name = "openvitals"
-version = "0.7.0"
+version = "0.8.0"
 description = "Open, validated sleep and recovery algorithms for wrist wearables, with a reproducible benchmark."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -108,7 +108,13 @@ def main(argv: list[str] | None = None) -> int:
     st.add_argument("--model", type=Path, help="ONNX model (default: bundled HR-only 4-class ensemble)")
     st.add_argument("--out", type=Path, help="write <date>.csv / <date>.json per night and nights.csv here")
 
+    tr = sub.add_parser("trend", help="recovery score across nights from saved nights.csv files")
+    tr.add_argument("files", nargs="+", type=Path, help="nights.csv from `stage --out` (later files win per night)")
+    tr.add_argument("--out", type=Path, help="write the scored nights to this CSV")
+
     a = p.parse_args(argv)
+    if a.cmd == "trend":
+        return _trend(a)
     if a.cmd == "stage":
         return _stage(a)
     if a.cmd == "merge":
@@ -246,14 +252,75 @@ def _stage(a) -> int:
                      "resting_hr": _r(rhr["lowest_hr_5min"]), "avg_sleep_hr": _r(rhr["avg_sleep_hr"]),
                      "hrv_rmssd_ms": _r(hrv.get("rmssd_ms") if hrv else None),
                      "warnings": " | ".join(res.warnings)})
+    scores = {r["night"]: r for r in recovery.recovery_scores(rows)}
+    for r in rows:
+        sc = scores[r["night"]]
+        r.update(recovery_score=_r(sc["recovery_score"]), recovery_band=sc["band"] or "", recovery_note=sc["note"])
+    if len(rows) > 1:
+        print("\n" + _trend_table(rows))
     if a.out:
+        for r in rows:  # add the score to each night's JSON
+            p = a.out / f"{r['night']}.json"
+            info = json.loads(p.read_text())
+            info["recovery"]["score"] = scores[r["night"]]
+            p.write_text(json.dumps(info, indent=1))
         keys = list(dict.fromkeys(k for r in rows for k in r))
-        lines = [",".join(keys)] + [",".join(f'"{r.get(k, "")}"' if k == "warnings" else str(r.get(k, ""))
-                                             for k in keys) for r in rows]
+        lines = [",".join(keys)] + [",".join(_csv_cell(r.get(k, "")) for k in keys) for r in rows]
         (a.out / "nights.csv").write_text("\n".join(lines) + "\n")
         print(f"\nwrote {len(rows)} night(s) to {a.out}/", file=sys.stderr)
     print("\nNot a medical device: estimates for wellness and research use only.", file=sys.stderr)
     return 0
+
+
+def _trend(a) -> int:
+    import csv
+
+    from . import recovery
+
+    by_night = {}
+    for f in a.files:
+        with open(f, newline="") as fh:
+            for row in csv.DictReader(fh):
+                by_night[row["night"]] = row
+    if not by_night:
+        raise SystemExit("no nights found")
+    rows = sorted(by_night.values(), key=lambda r: r["night"])
+    for r, sc in zip(rows, recovery.recovery_scores(rows)):
+        r.update(recovery_score=_r(sc["recovery_score"]), recovery_band=sc["band"] or "", recovery_note=sc["note"])
+    print(_trend_table(rows))
+    if a.out:
+        keys = list(dict.fromkeys(k for r in rows for k in r))
+        a.out.write_text("\n".join([",".join(keys)] + [",".join(_csv_cell(r.get(k, "")) for k in keys)
+                                                          for r in rows]) + "\n")
+        print(f"wrote {a.out}", file=sys.stderr)
+    print("\nScore: 50 = normal for you (vs your previous 28 nights); not a medical measure.", file=sys.stderr)
+    return 0
+
+
+def _trend_table(rows: list[dict]) -> str:
+    def f(x, fmt):
+        try:
+            return fmt.format(float(x))
+        except (TypeError, ValueError):
+            return "–"
+    lines = [f"{'night':<11} {'score':>5}  {'band':<6} {'HRV':>6} {'rest HR':>7} {'sleep':>6}  note"]
+    for r in rows:
+        lines.append(f"{r['night']:<11} {f(r.get('recovery_score'), '{:.0f}'):>5}  {r.get('recovery_band') or '–':<6} "
+                     f"{f(r.get('hrv_rmssd_ms'), '{:.0f}ms'):>6} {f(r.get('resting_hr'), '{:.0f}'):>7} "
+                     f"{f(_minutes(r.get('tst_min')), '{:.1f}h'):>6}  {r.get('recovery_note', '')}")
+    return "\n".join(lines)
+
+
+def _minutes(x):
+    try:
+        return float(x) / 60
+    except (TypeError, ValueError):
+        return None
+
+
+def _csv_cell(v) -> str:
+    v = "" if v is None else str(v)
+    return f'"{v.replace(chr(34), chr(39))}"' if any(c in v for c in ',"|;') else v
 
 
 def _r(x, nd: int = 1):

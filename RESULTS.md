@@ -6,6 +6,15 @@ v0.1 below: Walch has motion + HR; BIDSleep is **HR only** locally, so every BID
 number here is HR-only. [`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)
 fills in motion on Colab.
 
+## v0.8: recovery score (2026-11-16)
+
+A transparent personal-baseline score (0–100, 50 = normal for you): HRV 50%, resting heart rate 30%,
+sleep 20%, each against your previous 28 nights. It's a formula, not a model, so there's no accuracy
+claim. Its properties are unit-tested (stress night scores low, no use of future nights, no alarms
+on flat history). See [`docs/RECOVERY.md`](docs/RECOVERY.md).
+
+---
+
 ## v0.7: overnight resting heart rate and HRV (2026-11-16)
 
 Full method and tables: [`docs/RECOVERY.md`](docs/RECOVERY.md).

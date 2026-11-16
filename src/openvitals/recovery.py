@@ -188,3 +188,77 @@ def night_recovery(result, hr_t: np.ndarray, hr_bpm: np.ndarray, beats: tuple | 
             out["hrv"] = {"source": "Apple Health HRV readings", "n_readings": len(vals), "rmssd_ms": r,
                           "ln_rmssd": float(np.log(r)), "apple_sdnn_ms": float(np.median(sdnns))}
     return out
+
+
+# -- recovery score across nights --------------------------------------------------------
+#
+# There is no ground truth for "recovery", so this is a transparent formula, not a
+# trained model: each measure tonight vs your own previous nights (a personal baseline,
+# the approach common in sports science, e.g. Plews et al. 2013 on rolling ln RMSSD).
+
+BASELINE_NIGHTS = 28    # nights of history used as the baseline
+MIN_HISTORY = 7         # earlier nights a measure needs before it counts
+Z_CLIP = 3.0
+WEIGHTS = {"hrv": 0.5, "rhr": 0.3, "sleep": 0.2}
+SD_FLOOR = {"hrv": 0.05, "rhr": 1.0, "sleep": 20.0}  # ln ms, bpm, minutes: no alarms on flat history
+BANDS = ((35, "low"), (65, "normal"), (101, "high"))
+
+
+def recovery_scores(nights: list[dict]) -> list[dict]:
+    """Score each night against the nights before it (never later ones).
+
+    nights: dicts with "night" (YYYY-MM-DD) and any of "hrv_rmssd_ms", "resting_hr",
+    "tst_min" (None/"" when missing). Returns one dict per night, in date order, with
+    "recovery_score" (0-100, 50 = normal for you; None until there is enough history),
+    "band", per-measure z-scores and a plain-language "note"."""
+    rows = sorted(nights, key=lambda r: r["night"])
+    vals = {
+        "hrv": [_num(r.get("hrv_rmssd_ms"), log=True) for r in rows],
+        "rhr": [_num(r.get("resting_hr")) for r in rows],
+        "sleep": [_num(r.get("tst_min")) for r in rows],
+    }
+    out = []
+    for i, r in enumerate(rows):
+        z, notes = {}, []
+        for m, series in vals.items():
+            today = series[i]
+            hist = [v for v in series[max(0, i - BASELINE_NIGHTS):i] if v is not None]
+            if today is None or len(hist) < MIN_HISTORY:
+                continue
+            mean = float(np.mean(hist))
+            sd = max(float(np.std(hist, ddof=1)), SD_FLOOR[m])
+            zz = (today - mean) / sd
+            if m == "rhr":
+                zz = -zz  # lower resting heart rate = better recovered
+            z[m] = float(np.clip(zz, -Z_CLIP, Z_CLIP))
+            notes.append(_describe(m, today, mean))
+        score = band = None
+        if "hrv" in z or "rhr" in z:   # sleep length alone is not a recovery signal
+            w = {m: WEIGHTS[m] for m in z}
+            wz = sum(w[m] * z[m] for m in z) / sum(w.values())
+            score = round(float(np.clip(50 + wz * 50 / Z_CLIP, 0, 100)), 1)
+            band = next(name for lim, name in BANDS if score < lim)
+        out.append({"night": r["night"], "recovery_score": score, "band": band,
+                    **{f"{m}_z": round(z[m], 2) if m in z else None for m in WEIGHTS},
+                    "note": "; ".join(notes) if notes else
+                    f"needs {MIN_HISTORY} earlier nights with HRV or resting heart rate"})
+    return out
+
+
+def _num(x, log: bool = False):
+    try:
+        v = float(x)
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(v) or (log and v <= 0):
+        return None
+    return float(np.log(v)) if log else v
+
+
+def _describe(m: str, today: float, mean: float) -> str:
+    if m == "hrv":
+        pct = 100 * (np.exp(today - mean) - 1)
+        return f"HRV {abs(pct):.0f}% {'above' if pct >= 0 else 'below'} your average"
+    if m == "rhr":
+        return f"resting HR {today - mean:+.1f} bpm vs your average"
+    return f"sleep {today - mean:+.0f} min vs your average"

@@ -8,7 +8,7 @@ sensor data, but each one reinvents sleep staging and recovery scoring with no
 published accuracy. OpenVitals is a shared, device-agnostic library with
 numbers attached.
 
-**Status:** v0.7 – overnight resting heart rate and HRV (validated against ECG); `openvitals stage` for your own nights (Apple Health, Gadgetbridge, CSV) with a bundled HR-only model; baselines, whole-night sequence models and ensembles, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets, pooled training on all 253 BIDSleep HR nights + Walch; see [RESULTS.md](RESULTS.md). Not a medical device; for
+**Status:** v0.8 – personal-baseline recovery score; overnight resting heart rate and HRV (validated against ECG); `openvitals stage` for your own nights (Apple Health, Gadgetbridge, CSV) with a bundled HR-only model; baselines, whole-night sequence models and ensembles, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets, pooled training on all 253 BIDSleep HR nights + Walch; see [RESULTS.md](RESULTS.md). Not a medical device; for
 wellness and research use only.
 
 ## Stage your own nights
@@ -30,7 +30,9 @@ ensemble, which runs on numpy + onnxruntime (no torch). Accuracy, training data 
 Each night also gets **resting heart rate** (lowest 5 minutes asleep) and **average sleeping heart
 rate**. With beat-to-beat data, it gets **HRV (RMSSD)** too: pass a chest-strap export with
 `--ibi beats.csv` (e.g. Polar Sensor Logger), or use an Apple Health export, whose HRV readings are
-read automatically. Methods and validation are in [`docs/RECOVERY.md`](docs/RECOVERY.md).
+read automatically. With a week or more of nights, each night also gets a **recovery score** (0–100, 50 = normal *for
+you*, compared with your previous 28 nights), with a plain-language reason. `openvitals trend
+nights.csv` rescores saved results. Methods and validation are in [`docs/RECOVERY.md`](docs/RECOVERY.md).
 
 From Python:
 
