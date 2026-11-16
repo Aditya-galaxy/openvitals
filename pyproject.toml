@@ -1,22 +1,22 @@
 [project]
 name = "openvitals"
-version = "0.1.0"
+version = "0.6.0"
 description = "Open, validated sleep and recovery algorithms for wrist wearables, with a reproducible benchmark."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "Apache-2.0"
+license = "MIT"
 dependencies = [
     "numpy>=1.26",
     "pandas>=2.1",
     "scipy>=1.11",
     "scikit-learn>=1.4",
+    "onnxruntime>=1.18",  # `openvitals stage` runs the bundled model without torch
 ]
 
 [project.optional-dependencies]
 mat73 = ["h5py>=3.10"]
-seq = [
+seq = [  # training and ONNX export
     "onnx>=1.16",
-    "onnxruntime>=1.18",
     "torch>=2.4",
 ]
 

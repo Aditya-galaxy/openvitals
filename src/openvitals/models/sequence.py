@@ -138,6 +138,37 @@ class SequenceModel:
         onnx.save(model, str(path))
         return path
 
+    # -- picklable snapshot ---------------------------------------------------
+
+    def params(self) -> dict:
+        """Constructor arguments, so an identical untrained model can be rebuilt elsewhere."""
+        return {k: getattr(self, k) for k in ("arch", "inputs", "hidden", "max_epochs", "patience",
+                                              "lr", "dropout", "val_frac", "seed")}
+
+    def state(self) -> dict:
+        """Everything needed to rebuild the trained model, as plain picklable values
+        (the torch classes are defined inside `_build`, so modules can't be pickled)."""
+        return {
+            "arch": self.arch, "inputs": self.inputs, "hidden": self.hidden, "dropout": self.dropout,
+            "seed": self.seed, "scheme": self.scheme_, "n_classes": self.n_classes_,
+            "mean": self.mean_, "std": self.std_, "feature_names": list(self.feature_names_),
+            "epochs_trained": self.epochs_trained_, "val_kappa": self.val_kappa_,
+            "weights": {k: v.detach().cpu().numpy() for k, v in self.net_.state_dict().items()},
+        }
+
+    @classmethod
+    def from_state(cls, st: dict) -> "SequenceModel":
+        import torch
+
+        m = cls(st["arch"], st["inputs"], hidden=st["hidden"], dropout=st["dropout"], seed=st["seed"])
+        m.scheme_, m.n_classes_ = st["scheme"], st["n_classes"]
+        m.mean_, m.std_, m.feature_names_ = st["mean"], st["std"], st["feature_names"]
+        m.epochs_trained_, m.val_kappa_ = st["epochs_trained"], st["val_kappa"]
+        m.net_ = _build(m.arch, len(m.mean_), m.hidden, m.n_classes_, m.dropout)
+        m.net_.load_state_dict({k: torch.from_numpy(v) for k, v in st["weights"].items()})
+        m.net_.eval()
+        return m
+
     # -- helpers --------------------------------------------------------------
 
     def _night_arrays(self, night: Night, scheme: str):
@@ -192,10 +223,63 @@ class Ensemble:
         size = f"{len(self.members)}" if n_seeds > 1 else ""
         self.name = f"ens{size}_{inputs.replace('+', '_')}"
 
-    def fit(self, nights: list[Night], scheme: str) -> "Ensemble":
-        for m in self.members:
-            m.fit(nights, scheme)
+    def fit(self, nights: list[Night], scheme: str, n_jobs: int = 1) -> "Ensemble":
+        """n_jobs > 1 trains members in separate processes. Each member depends only on
+        its own seed and the data, so the result is the same as training them in turn."""
+        if n_jobs <= 1:
+            for m in self.members:
+                m.fit(nights, scheme)
+            return self
+        import multiprocessing as mp
+        from concurrent.futures import ProcessPoolExecutor
+
+        jobs = [(m.params(), nights, scheme) for m in self.members]
+        with ProcessPoolExecutor(max_workers=n_jobs, mp_context=mp.get_context("spawn")) as pool:
+            states = list(pool.map(_fit_member, jobs))
+        self.members = [SequenceModel.from_state(st) for st in states]
         return self
+
+    def export_onnx(self, path: Path, opset: int = 17) -> Path:
+        """One graph: raw features (1, T, F) -> mean member softmax `probs` (1, T, C).
+        Each member standardises its own input inside the graph."""
+        import json
+
+        import onnx
+        import torch
+        from torch import nn
+
+        first = self.members[0]
+        for m in self.members[1:]:
+            if m.feature_names_ != first.feature_names_ or m.scheme_ != first.scheme_:
+                raise ValueError("ensemble members disagree on features or scheme")
+
+        class Graph(nn.Module):
+            def __init__(self, nets):
+                super().__init__()
+                self.nets = nn.ModuleList(nets)
+
+            def forward(self, features):
+                return torch.stack([torch.softmax(n(features), dim=-1) for n in self.nets]).mean(0)
+
+        graph = Graph([_Standardised(m.net_, m.mean_, m.std_) for m in self.members]).eval()
+        path = Path(path)
+        torch.onnx.export(
+            graph, (torch.zeros(1, 64, len(first.mean_)),), str(path), input_names=["features"],
+            output_names=["probs"], dynamic_axes={"features": {1: "epochs"}, "probs": {1: "epochs"}},
+            opset_version=opset, dynamo=False,
+        )
+        model = onnx.load(str(path))
+        meta = {
+            "openvitals_version": __version__, "model": self.name, "scheme": first.scheme_,
+            "classes": json.dumps(stages.class_names(first.scheme_)),
+            "features": json.dumps(first.feature_names_), "inputs": first.inputs, "epoch_seconds": "30",
+            "members": json.dumps([f"{m.arch}:seed{m.seed}" for m in self.members]),
+        }
+        for k, v in meta.items():
+            entry = model.metadata_props.add()
+            entry.key, entry.value = k, v
+        onnx.save(model, str(path))
+        return path
 
     def predict(self, night: Night) -> np.ndarray:
         if night.n_epochs == 0:
@@ -209,6 +293,15 @@ class Ensemble:
             e = np.exp(z - z.max(1, keepdims=True))
             probs.append(e / e.sum(1, keepdims=True))
         return np.mean(probs, axis=0)
+
+
+def _fit_member(job) -> dict:
+    """Process-pool worker: fit one ensemble member and return its picklable state."""
+    import torch
+
+    torch.set_num_threads(1)
+    params, nights, scheme = job
+    return SequenceModel(**params).fit(nights, scheme).state()
 
 
 def _build(arch: str, n_in: int, hidden: int, n_out: int, dropout: float):

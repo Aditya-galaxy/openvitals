@@ -7,3 +7,5 @@ data/
 logs/
 feat/
 notebooks/*.bundled.ipynb
+build/
+.DS_Store

@@ -79,3 +79,26 @@ def test_ens10_members_cover_five_seeds_per_arch():
     assert m.name == "ens10_hr" and len(m.members) == 10
     assert [(x.arch, x.seed) for x in m.members[:5]] == [("tcn", s) for s in range(5, 10)]
     assert models.make("ens_hr", seed=2).name == "ens_hr"
+
+
+def test_parallel_ensemble_fit_matches_serial_and_exports_one_onnx_graph(walch_nights, tmp_path):
+    from openvitals.models.sequence import Ensemble
+
+    train, night = walch_nights[:6], walch_nights[7]
+    serial = Ensemble("hr", max_epochs=2, seed=1).fit(train, "4class")
+    parallel = Ensemble("hr", max_epochs=2, seed=1).fit(train, "4class", n_jobs=2)
+    np.testing.assert_allclose(parallel.predict_proba(night), serial.predict_proba(night), rtol=1e-5, atol=1e-6)
+
+    path = parallel.export_onnx(tmp_path / "ens.onnx")
+    sess = ort.InferenceSession(str(path))
+    meta = sess.get_modelmeta().custom_metadata_map
+    assert json.loads(meta["members"]) == ["tcn:seed1", "gru:seed1"] and meta["inputs"] == "hr"
+    x = features.extract(night, "hr").X.astype(np.float32)[None]
+    probs = sess.run(["probs"], {"features": x})[0][0]
+    np.testing.assert_allclose(probs, parallel.predict_proba(night), rtol=1e-4, atol=1e-5)
+
+
+def test_member_state_roundtrip(walch_nights):
+    m = SequenceModel("tcn", "hr", max_epochs=2).fit(walch_nights[:6], "3class")
+    r = SequenceModel.from_state(m.state())
+    np.testing.assert_allclose(r.predict_logits(walch_nights[7]), m.predict_logits(walch_nights[7]), rtol=1e-6)

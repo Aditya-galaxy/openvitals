@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import sys
 from pathlib import Path
 
@@ -69,10 +70,12 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--dataset", help="only this dataset's test subjects")
     c.add_argument("--bootstrap", type=int, default=benchmark.N_BOOT)
 
-    e = sub.add_parser("export", help="train a sequence model on all given nights and write ONNX")
+    e = sub.add_parser("export", help="train a sequence model or ensemble on all given nights and write ONNX")
     e.add_argument("data", nargs="+", metavar="NAME=PATH")
-    e.add_argument("--model", choices=sorted(models.SEQUENCE), default="tcn_motion_hr")
+    e.add_argument("--model", choices=sorted({**models.SEQUENCE, **models.ENSEMBLE}), default="tcn_motion_hr")
     e.add_argument("--scheme", choices=sorted(stages.SCHEMES), default="4class")
+    e.add_argument("--seed", type=int, default=0)
+    e.add_argument("--jobs", type=int, default=1, help="train ensemble members in parallel processes")
     e.add_argument("--out", type=Path, required=True)
     e.add_argument("--cache", type=Path, default=Path(".cache"))
 
@@ -88,7 +91,25 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--claim", action="store_true", help="share the feature store as a work queue with other processes")
     f.add_argument("--clear-claims", action="store_true", help="remove stale claims first (no other process running)")
 
+    st = sub.add_parser("stage", help="stage your own nights from a device export (no labels needed)")
+    src = st.add_mutually_exclusive_group(required=True)
+    src.add_argument("--csv", type=Path, help="CSV with time (ISO 8601 or Unix s) and hr columns")
+    src.add_argument("--apple-health", type=Path, help="Apple Health export.zip or export.xml")
+    src.add_argument("--gadgetbridge", type=Path, help="Gadgetbridge database export (SQLite)")
+    st.add_argument("--source", help="Apple Health: only records whose source name contains this")
+    st.add_argument("--table", help="Gadgetbridge: sample table to read (default: most heart-rate rows)")
+    st.add_argument("--device-id", type=int, help="Gadgetbridge: DEVICE_ID to keep")
+    st.add_argument("--tz", help="IANA timezone for night windows and output (default: this computer's)")
+    st.add_argument("--window", default="20:00-12:00", help="local night window, start-end (default 20:00-12:00)")
+    st.add_argument("--night", help="only the night starting on this date (YYYY-MM-DD)")
+    st.add_argument("--whole", action="store_true", help="treat all samples as one night (no windowing)")
+    st.add_argument("--no-trim", action="store_true", help="stage the full window; skip sleep-period detection")
+    st.add_argument("--model", type=Path, help="ONNX model (default: bundled HR-only 4-class ensemble)")
+    st.add_argument("--out", type=Path, help="write <date>.csv / <date>.json per night and nights.csv here")
+
     a = p.parse_args(argv)
+    if a.cmd == "stage":
+        return _stage(a)
     if a.cmd == "merge":
         import json
 
@@ -116,7 +137,12 @@ def main(argv: list[str] | None = None) -> int:
                             log=lambda m: print(m, flush=True), max_nights=a.max_nights, claim=a.claim)
         return 0
     if a.cmd == "export":
-        model = models.make(a.model).fit(_load_all(a.data, a.cache), a.scheme)
+        nights = _load_all(a.data, a.cache)
+        model = models.make(a.model, seed=a.seed)
+        if a.model in models.ENSEMBLE:
+            model.fit(nights, a.scheme, n_jobs=a.jobs)
+        else:
+            model.fit(nights, a.scheme)
         print(model.export_onnx(a.out))
         return 0
     if a.cmd == "download":
@@ -150,6 +176,78 @@ def main(argv: list[str] | None = None) -> int:
     print(mpath.read_text())
     print(f"wrote {jpath} and {mpath}", file=sys.stderr)
     return 0
+
+
+def _stage(a) -> int:
+    import json
+
+    from zoneinfo import ZoneInfo
+
+    from . import adapters
+    from .infer import Stager, night_from_samples
+
+    if a.csv:
+        t, hr = adapters.read_csv(a.csv)
+    elif a.apple_health:
+        t, hr = adapters.read_apple_health(a.apple_health, source=a.source)
+    else:
+        t, hr = adapters.read_gadgetbridge(a.gadgetbridge, table=a.table, device_id=a.device_id)
+    if len(t) == 0:
+        raise SystemExit("no heart-rate samples found")
+    tzname = a.tz or _local_tz()
+    tz = ZoneInfo(tzname)
+    if a.whole:
+        windows = [(datetime.fromtimestamp(t[0], tz).date(), float(t[0]), float(t[-1]) + 1)]
+    else:
+        ws, we = a.window.split("-")
+        windows = adapters.split_nights(t, tz=tzname, window=(ws, we))
+        if a.night:
+            windows = [w for w in windows if str(w[0]) == a.night]
+    if not windows:
+        raise SystemExit("no night with at least 3 h of heart-rate data in the window"
+                         + (f" on {a.night}" if a.night else "") + "; try --whole or --window")
+    stager = Stager(a.model)
+    print(f"model: {stager.meta.get('model', stager.path.name)} ({stager.inputs}, {stager.scheme}) | "
+          f"{len(t)} HR samples | {len(windows)} night(s) | timezone {tzname}", file=sys.stderr)
+    if a.out:
+        a.out.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for d, start, end in windows:
+        sel = (t >= start) & (t < end)
+        res = stager.stage(night_from_samples(t[sel], hr[sel], start=start, end=end, night_id=str(d)),
+                           trim=not a.no_trim)
+        info = res.to_dict(tz=tz)
+        s = res.summary
+        print(f"\n{d}  {info['start'][11:16]}–{info['end'][11:16]}  "
+              f"asleep {s.get('tst_min', 0) / 60:.1f} h  efficiency {s.get('se', 0):.0%}  "
+              f"onset {s.get('sol_min', 0):.0f} min  WASO {s.get('waso_min', 0):.0f} min  | "
+              + "  ".join(f"{c} {s.get(c + '_min', 0):.0f}m" for c in res.classes if c != "wake"))
+        print(res.hypnogram())
+        for w in res.warnings:
+            print(f"  warning: {w}")
+        if a.out:
+            res.to_csv(a.out / f"{d}.csv", tz=tz)
+            (a.out / f"{d}.json").write_text(json.dumps(info, indent=1))
+        rows.append({"night": str(d), "start": info["start"], "end": info["end"],
+                     **{k: round(v, 3) for k, v in s.items()}, "warnings": " | ".join(res.warnings)})
+    if a.out:
+        keys = list(dict.fromkeys(k for r in rows for k in r))
+        lines = [",".join(keys)] + [",".join(f'"{r.get(k, "")}"' if k == "warnings" else str(r.get(k, ""))
+                                             for k in keys) for r in rows]
+        (a.out / "nights.csv").write_text("\n".join(lines) + "\n")
+        print(f"\nwrote {len(rows)} night(s) to {a.out}/", file=sys.stderr)
+    print("\nNot a medical device: estimates for wellness and research use only.", file=sys.stderr)
+    return 0
+
+
+def _local_tz() -> str:
+    """This computer's IANA timezone name, from $TZ or /etc/localtime; UTC if unknown."""
+    import os
+
+    if os.environ.get("TZ"):
+        return os.environ["TZ"]
+    real = os.path.realpath("/etc/localtime")
+    return real.split("zoneinfo/", 1)[1] if "zoneinfo/" in real else "UTC"
 
 
 def _load_all(specs: list[str], cache: Path):

@@ -8,8 +8,32 @@ sensor data, but each one reinvents sleep staging and recovery scoring with no
 published accuracy. OpenVitals is a shared, device-agnostic library with
 numbers attached.
 
-**Status:** v0.5 – baselines, whole-night sequence models and ensembles, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets, pooled training on all 253 BIDSleep HR nights + Walch; see [RESULTS.md](RESULTS.md). Not a medical device; for
+**Status:** v0.6 – `openvitals stage` for your own nights (Apple Health, Gadgetbridge, CSV) with a bundled HR-only model; baselines, whole-night sequence models and ensembles, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets, pooled training on all 253 BIDSleep HR nights + Walch; see [RESULTS.md](RESULTS.md). Not a medical device; for
 wellness and research use only.
+
+## Stage your own nights
+
+```bash
+pip install "git+https://github.com/Aditya-galaxy/openvitals"   # or a built wheel
+openvitals stage --apple-health ~/Downloads/export.zip --out my-sleep
+openvitals stage --gadgetbridge Gadgetbridge --night 2026-11-10
+openvitals stage --csv hr.csv --whole      # time (ISO 8601 or Unix s), hr
+```
+
+It reads heart rate from the export, cuts it into nights (20:00–12:00 local time by default), finds
+the main sleep period, and stages each 30 s epoch as wake, light, deep or REM. Then it prints a
+hypnogram and night totals. With `--out` it writes `<date>.csv` (per-epoch stage and probabilities),
+`<date>.json` and `nights.csv`. The bundled model is the heart-rate-only 10-model TCN + GRU
+ensemble, which runs on numpy + onnxruntime (no torch). Accuracy, training data and limits are in
+[`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). **Not a medical device.**
+
+From Python:
+
+```python
+from openvitals.infer import Stager, night_from_samples
+result = Stager().stage(night_from_samples(unix_seconds, bpm))
+print(result.summary); print(result.hypnogram())
+```
 
 ## Benchmark rules
 
@@ -137,6 +161,9 @@ src/openvitals/
   benchmark.py   run + markdown/json report
   download.py    PhysioNet fetch with checksum verification
   featstore.py   per-subject feature files; streaming featurize
+  infer.py       Stager: stage unlabelled nights with an exported ONNX model
+  adapters.py    CSV, Apple Health and Gadgetbridge readers; split_nights
+  assets/        bundled release model (stager_hr_4class.onnx)
 ```
 
 ## Tests
