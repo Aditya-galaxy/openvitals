@@ -173,3 +173,37 @@ def test_trend_cli_merges_files_and_roundtrips_csv(tmp_path, capsys):
     rows = list(csv.DictReader(open(out)))
     assert [r["night"] for r in rows] == [r["night"] for r in hist]          # deduplicated, in order
     assert rows[-1]["recovery_score"] and "your average" in rows[-1]["recovery_note"]
+
+
+def _synthetic_beats(n=600, seed=0):
+    rng = np.random.default_rng(seed)
+    rr = 1.0 + 0.05 * np.sin(np.arange(n) / 4) + rng.normal(0, 0.02, n)  # ~60 bpm with HRV
+    return np.cumsum(rr) + 1.0
+
+
+def test_ecg_r_peaks_recover_beat_times():
+    from openvitals import beats
+    fs, t_beats = 100.0, _synthetic_beats()
+    t = np.arange(0, t_beats[-1] + 1, 1 / fs)
+    ecg = np.zeros_like(t)
+    for tb in t_beats:  # narrow R wave + broad T wave, inverted lead
+        ecg -= np.exp(-0.5 * ((t - tb) / 0.012) ** 2) + 0.3 * np.exp(-0.5 * ((t - tb - 0.25) / 0.05) ** 2)
+    ecg += np.random.default_rng(1).normal(0, 0.02, t.size)
+    found = beats.ecg_r_peaks(ecg, fs)
+    assert abs(len(found) - len(t_beats)) <= 2
+    err = np.abs(found[:, None] - t_beats[None]).min(1)
+    assert np.median(err) < 0.004  # sub-sample at 100 Hz
+
+
+def test_ppg_beats_track_rr_and_rmssd():
+    from openvitals import beats, recovery
+    fs, t_beats = 64.0, _synthetic_beats(seed=2)
+    t = np.arange(0, t_beats[-1] + 1, 1 / fs)
+    ppg = np.zeros_like(t)
+    for tb in t_beats + 0.25:  # pulse arrives 250 ms after R
+        ppg += np.exp(-0.5 * ((t - tb - 0.12) / 0.08) ** 2) + 0.4 * np.exp(-0.5 * ((t - tb - 0.45) / 0.1) ** 2)
+    found = beats.ppg_beats(ppg, fs)
+    assert abs(len(found) - len(t_beats)) <= 2
+    ref = recovery.rmssd(np.diff(t_beats) * 1000)
+    est = recovery.rmssd(np.diff(found) * 1000)
+    assert abs(est - ref) / ref < 0.10
