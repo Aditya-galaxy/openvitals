@@ -70,3 +70,41 @@ def test_compact_feature_cache(walch_root, tmp_path):
     second = datasets.load("walch", walch_root, cache_dir=tmp_path, compact=True)
     np.testing.assert_allclose(features.extract(first[0], "motion+hr").X, features.extract(second[0], "motion+hr").X)
     assert second[0].meta["compacted"]
+
+
+def _write_dreamt(path, rng, n_epochs=200, lead_in=600.0, fs=64):
+    """Synthetic DREAMT file: P lead-in, then stages starting at lead_in seconds."""
+    from conftest import hypnogram
+
+    hyp = hypnogram(rng, n_epochs)
+    names = np.array(["W", "N1", "N2", "N3", "R"])
+    t = np.arange(0, lead_in + n_epochs * 30, 1 / fs)
+    ep = np.floor((t - lead_in) / 30).astype(int)
+    stage = np.where(ep < 0, "P", names[hyp[np.clip(ep, 0, n_epochs - 1)]])
+    stage[(ep == 5)] = "Missing"
+    hr = np.round(60 + 10 * (stage == "W"), 2)
+    ibi = np.where(t < 2, np.nan, 0.8 + 0.1 * (np.floor(t / 0.8) % 2))
+    acc = np.column_stack([np.zeros_like(t), np.zeros_like(t), np.full_like(t, 64.0)])
+    import pandas as pd
+
+    pd.DataFrame({"TIMESTAMP": t, "BVP": 0.0, "ACC_X": acc[:, 0], "ACC_Y": acc[:, 1], "ACC_Z": acc[:, 2],
+                  "TEMP": 34.0, "EDA": 0.1, "HR": hr, "IBI": ibi, "Sleep_Stage": stage,
+                  "Obstructive_Apnea": np.nan}).to_csv(path, index=False)
+    return hyp
+
+
+def test_dreamt_aligns_to_first_scored_epoch(tmp_path):
+    d = tmp_path / "data_64Hz"
+    d.mkdir()
+    hyp = _write_dreamt(d / "S002_whole_df.csv", np.random.default_rng(3))
+    nights = datasets.load("dreamt", tmp_path, cache_dir=tmp_path / "c")
+    n = nights[0]
+    assert n.subject_id == "S002" and n.n_epochs == len(hyp)
+    assert n.labels[5] == stages.UNKNOWN  # Missing
+    keep = np.arange(len(hyp)) != 5
+    np.testing.assert_array_equal(n.labels[keep], hyp[keep])  # W,N1,N2,N3,R map 1:1 to canonical
+    assert abs(n.meta["e4_offset_s"] - 600) < 1e-6
+    assert n.motion[0, 0] == -600 and np.allclose(n.motion[:, 3], 1.0)  # 64 units = 1 g
+    assert np.allclose(np.diff(n.hr[:, 0]), 1.0)
+    again = datasets.load("dreamt", tmp_path, cache_dir=tmp_path / "c")[0]
+    np.testing.assert_array_equal(again.labels, n.labels)

@@ -8,9 +8,9 @@ import pickle
 from pathlib import Path
 
 from ..schema import Night
-from . import bidsleep, walch
+from . import bidsleep, dreamt, walch
 
-REGISTRY = {m.NAME: m for m in (walch, bidsleep)}
+REGISTRY = {m.NAME: m for m in (walch, bidsleep, dreamt)}
 
 
 def load(name: str, root: Path, cache_dir: Path | None = None, compact: bool = False, **kw) -> list[Night]:
