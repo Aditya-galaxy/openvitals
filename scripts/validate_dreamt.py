@@ -150,14 +150,16 @@ def main() -> None:
     files = {sid: p for sid, p in dreamt._files(a.root).items() if ok is None or sid in ok}
     for sid, path in files.items():
         f = a.out / "subjects" / f"{sid}.json"
-        if f.exists():
+        if f.exists() and f.stat().st_size > 0:
             continue
         try:
             r = run_subject(path, sid, models, a.cache)
         except Exception as e:  # one bad file shouldn't stop the run
             print(f"{sid}: FAILED {e!r}", flush=True)
             continue
-        f.write_text(json.dumps(r))
+        tmp = f.with_suffix(".tmp")
+        tmp.write_text(json.dumps(r))
+        tmp.replace(f)  # atomic: a crash never leaves a half-written result
         k = {key: round(metrics.cohen_kappa(np.array(v["cm"])), 3) for key, v in r["results"].items() if "1 / 5 s" in key}
         print(f"{sid}: {r['scored']} scored epochs, kappa {k}", flush=True)
 

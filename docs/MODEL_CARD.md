@@ -64,15 +64,29 @@ log at night.
 At one sample per minute, typical of fitness bands exported via Gadgetbridge, expect kappa around
 **0.45**. Every 5 minutes is too coarse to be useful, and `stage` warns about it.
 
+### Different cohort and device: much lower (DREAMT)
+
+On **DREAMT** (100 adults referred to a sleep lab, most with sleep apnea, Empatica E4 wristband),
+the shipped model reaches 4-class kappa **0.236** [0.204, 0.267] and wake/sleep kappa 0.349.
+People without apnea: 0.269. Severe apnea (AHI ≥ 30): 0.168. Total sleep time is overestimated by
+23 min on average, with limits of agreement of −97 to +143 min. **The Walch figure above is the
+best case (healthy adults, Apple Watch); don't expect it for other devices or for people with
+sleep disorders.** Details: `RESULTS.md`, "DREAMT held-out test".
+
 ## Known limitations
+
+- **Accuracy depends strongly on who wears it and on what device.** Kappa is about 0.51 on healthy
+  adults with Apple Watch (Walch) and about 0.24 on sleep-clinic patients with an Empatica E4
+  (DREAMT). Fragmented sleep, little deep sleep and apnea all lower it.
 
 - **Wake is the weakest class** (about 54% sensitivity). Light sleep is often confused with wake
   and deep. Treat single-night minute counts as rough; trends over weeks are more reliable.
 - **Night totals are noisy per night:** total-sleep-time limits of agreement are about ±40 min.
 - **Coarser heart rate lowers accuracy** (see robustness above). Many devices log heart rate once a
   minute at night; `stage` warns when sampling is much coarser than the ~5 s training data.
-- **Cohort and device:** both training sets are Apple Watch heart rate in adults. Other optical
-  sensors, children, and people with arrhythmias, beta-blockers or sleep disorders are untested.
+- **Cohort and device:** both training sets are Apple Watch heart rate in adults. Children and
+  people with arrhythmias or on beta-blockers are untested. Sleep-clinic patients on another wrist
+  sensor were tested (DREAMT, above) and accuracy roughly halves.
 - **Night windowing:** `stage` finds the main sleep period with a first pass and re-stages around
   it. Naps and split sleep are not handled. Use `--whole` or `--no-trim` to control the window.
 

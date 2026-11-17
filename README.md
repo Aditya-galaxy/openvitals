@@ -61,7 +61,7 @@ print(result.summary); print(result.hypnogram())
 | `walch` | [PhysioNet sleep-accel 1.0.0](https://physionet.org/content/sleep-accel/1.0.0/) | 31 / 31 | Apple Watch accel + PPG HR | PSG | open (2.2 GB; fetched from the AWS Open Data mirror) |
 | `bidsleep` | [PhysioNet bidsleep-dataset 1.0.1](https://physionet.org/content/bidsleep-dataset/) | 47 / 253 | Apple Watch accel + HealthKit HR | Dreem 2 EEG, expert-corrected | open (27.9 GB, ~27 GB of it motion; loads HR-only if `motion.csv` is absent) |
 
-Planned: DREAMT (credentialed), MESA/SHHS via NSRR (data request). Model
+Tested on (not trained on): DREAMT 2.2.0 (restricted, 100 sleep-lab patients, Empatica E4); see RESULTS.md. Planned: MESA/SHHS via NSRR (data request). Model
 weights trained on restricted data will not be published unless the data-use
 agreement allows it.
 

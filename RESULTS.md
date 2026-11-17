@@ -6,6 +6,54 @@ v0.1 below: Walch has motion + HR; BIDSleep is **HR only** locally, so every BID
 number here is HR-only. [`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)
 fills in motion on Colab.
 
+## DREAMT held-out test (2026-11-17)
+
+**DREAMT 2.2.0**: 100 adults, one lab night each, Empatica E4 wristband with simultaneous
+polysomnography. Most were referred to the sleep lab (74 of 100 have apnea-hypopnea index ≥ 5).
+Neither model ever saw DREAMT. DREAMT is restricted (PhysioNet Restricted Health Data Use
+Agreement 1.5.0, research use only), so it is used for testing only and never for training a
+shipped model. Only aggregate results leave the download VM:
+[`results/dreamt/report.md`](results/dreamt/report.md) plus per-subject confusion matrices.
+Reproduce with `scripts/validate_dreamt.py` (the `openvitals stage` path: raw E4 heart rate →
+`night_from_samples` → `Stager`).
+
+| model | E4 heart rate | 4-class kappa [95% CI] | wake / light / deep / REM sens | TST bias [95% LoA] |
+|---|---|---|---|---|
+| shipped (`ens10_hr`, BIDSleep + Walch) | 1 / 5 s | **0.236** [0.204, 0.267] | 44% / 43% / 76% / 59% | +23 min [−97, +143] |
+| shipped | 1 / 60 s | 0.226 [0.195, 0.256] | 43% / 43% / 75% / 56% | +23 min [−98, +143] |
+| BIDSleep-only recipe (`val`) | 1 / 5 s | 0.223 [0.193, 0.253] | 41% / 41% / 75% / 62% | +29 min [−88, +146] |
+
+Same shipped model, coarser schemes: 3-class (wake/NREM/REM) **0.354** [0.319, 0.390], 2-class
+(wake/sleep) **0.349** [0.308, 0.389].
+
+By sleep-apnea severity (shipped, 1 / 5 s): AHI < 5: 0.269 [0.209, 0.329] (26 subjects);
+5–15: 0.257 [0.185, 0.330] (25); 15–30: 0.246 [0.194, 0.293] (24); ≥ 30: **0.168** [0.118, 0.222] (25).
+
+**What this means.** On DREAMT the model reaches about half its Walch kappa (0.51). This is the most
+important result so far: **the Walch number does not transfer to other cohorts and devices.**
+
+- **Not a pipeline error.** Stage boundaries fall exactly on the 30 s grid. Shifting labels against
+  predictions peaks within 2–3 min of zero (0.284 at +4 to +6 epochs vs 0.269 at 0, on 34
+  subjects), consistent with the E4 smoothing its heart rate. A small gain, not the cause.
+- **Deep sleep is rare in this cohort** (3.4% of scored epochs, vs about 15–20% in healthy adults).
+  The model labels 25% of the night as deep, and 30% of true light-sleep epochs go to deep.
+- **Wake/sleep also fails** (kappa 0.35), so it's not only a deep-sleep problem. A quarter of
+  scored epochs are wake, much of it in fragmented nights, and the model calls 22% of true wake
+  REM.
+- **Apnea hurts but isn't the main cause.** Even people without apnea score only 0.27. Severe
+  apnea (AHI ≥ 30) drops to 0.17.
+- **Wide spread across people:** median subject kappa 0.22; 23 subjects below 0.1 and 14 above 0.4.
+- Device and cohort can't be separated here: every DREAMT subject used the E4, and no training
+  subject did.
+
+Against the v1 target (4-class kappa ≥ 0.55 cross-dataset): not met; on DREAMT it's far off.
+Next: a model that is robust to cohort shift. Options, in order: (1) per-night heart-rate
+normalisation that doesn't assume a healthy sleep architecture; (2) training on more diverse open
+cohorts (MESA/SHHS via NSRR, if their agreements allow distributing derived weights); (3) report
+expected accuracy per population in the model card instead of one number.
+
+---
+
 ## v0.8: recovery score (2026-11-16)
 
 A transparent personal-baseline score (0–100, 50 = normal for you): HRV 50%, resting heart rate 30%,
