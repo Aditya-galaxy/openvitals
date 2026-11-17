@@ -50,10 +50,12 @@ sum="$1"; rel="$2"; out="$HOME/dreamt/$rel"
 mkdir -p "$(dirname "$out")"
 if [ -f "$out" ] && echo "$sum  $out" | sha256sum -c --status; then exit 0; fi
 for try in 1 2 3 4 5 6; do
-  wget -q -c --config="$HOME/.wgetrc-physionet" --timeout=120 --tries=3 -O "$out" \
-    "https://physionet.org/files/dreamt/2.2.0/$rel"
-  if echo "$sum  $out" | sha256sum -c --status; then
-    echo "$(date -u +%FT%TZ) ok $rel $(( $(stat -c %s "$out") / 1000000 )) MB" >> "$HOME/dreamt/progress.log"; exit 0
+  if wget -q -c --config="$HOME/.wgetrc-physionet" --timeout=120 --tries=3 -O "$out" \
+    "https://physionet.org/files/dreamt/2.2.0/$rel"; then
+    if echo "$sum  $out" | sha256sum -c --status; then
+      echo "$(date -u +%FT%TZ) ok $rel $(( $(stat -c %s "$out") / 1000000 )) MB" >> "$HOME/dreamt/progress.log"; exit 0
+    fi
+    rm -f "$out"  # complete but corrupt (e.g. after a crash): start over, don't resume onto it
   fi
   sleep $(( try * 30 ))
 done
