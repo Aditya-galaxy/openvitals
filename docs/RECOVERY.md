@@ -68,7 +68,7 @@ Empatica E4 wristband recorded together. **Method:** `openvitals.beats` finds R-
 (reference) and the steepest pulse upstroke in the wrist BVP waveform. Both go through the same
 cleaning and RMSSD as above, in fixed 5-minute windows that PSG scored as asleep. Only windows with
 a clean ECG count (76% of sleep windows; five subjects had mostly unusable ECG). Reproduce with
-`scripts/validate_dreamt_hrv.py`; aggregate results are in `results/dreamt_hrv/`.
+`scripts/validate_dreamt_hrv.py`; the aggregate report is `results/dreamt_hrv/report.md` (per-participant results are not published).
 
 | level | n | median error | 90th pct error | ρ (ln RMSSD) | wrist ÷ ECG, geometric mean [95% LoA] |
 |---|---|---|---|---|---|

@@ -9,3 +9,7 @@ feat/
 notebooks/*.bundled.ipynb
 build/
 .DS_Store
+
+# Restricted-data derivatives (per-participant results); never commit
+private/
+results/dreamt*/subjects/

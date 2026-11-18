@@ -22,7 +22,7 @@ polysomnography. Most were referred to the sleep lab (74 of 100 have apnea-hypop
 Neither model ever saw DREAMT. DREAMT is restricted (PhysioNet Restricted Health Data Use
 Agreement 1.5.0, research use only), so it is used for testing only and never for training a
 shipped model. Only aggregate results leave the download VM:
-[`results/dreamt/report.md`](results/dreamt/report.md) plus per-subject confusion matrices.
+[`results/dreamt/report.md`](results/dreamt/report.md). Per-participant results stay off the repo (data-use agreement).
 Reproduce with `scripts/validate_dreamt.py` (the `openvitals stage` path: raw E4 heart rate →
 `night_from_samples` → `Stager`).
 
