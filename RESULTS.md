@@ -6,6 +6,15 @@ v0.1 below: Walch has motion + HR; BIDSleep is **HR only** locally, so every BID
 number here is HR-only. [`notebooks/full_benchmark.ipynb`](notebooks/full_benchmark.ipynb)
 fills in motion on Colab.
 
+## DREAMT wrist HRV vs ECG (2026-11-18)
+
+20 sleep-lab patients, Empatica E4 BVP vs PSG ECG, 5-min sleep windows. OpenVitals' PPG beat detection:
+nightly RMSSD median error 16.2%, ρ 0.88 across people, but on average **28% higher than ECG** (95%
+LoA ×0.76 to ×2.13). Good for personal trends, not absolute values. Details: `docs/RECOVERY.md`
+("Real wrist PPG against ECG") and `results/dreamt_hrv/report.md`.
+
+---
+
 ## DREAMT held-out test (2026-11-17)
 
 **DREAMT 2.2.0**: 100 adults, one lab night each, Empatica E4 wristband with simultaneous

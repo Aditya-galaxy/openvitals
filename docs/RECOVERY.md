@@ -61,6 +61,39 @@ What this means:
   (ρ 0.90). With 3 readings it's noticeably worse. Rounding to whole bpm, as Apple stores beats,
   costs little.
 
+### Real wrist PPG against ECG (DREAMT)
+
+**Data:** DREAMT 2.2.0 (restricted, research use only), 20 sleep-lab patients with PSG ECG and an
+Empatica E4 wristband recorded together. **Method:** `openvitals.beats` finds R-peaks in the ECG
+(reference) and the steepest pulse upstroke in the wrist BVP waveform. Both go through the same
+cleaning and RMSSD as above, in fixed 5-minute windows that PSG scored as asleep. Only windows with
+a clean ECG count (76% of sleep windows; five subjects had mostly unusable ECG). Reproduce with
+`scripts/validate_dreamt_hrv.py`; aggregate results are in `results/dreamt_hrv/`.
+
+| level | n | median error | 90th pct error | ρ (ln RMSSD) | wrist ÷ ECG, geometric mean [95% LoA] |
+|---|---|---|---|---|---|
+| 5-min window | 752 windows (90% of clean-ECG windows had a wrist value) | 17.5% | 95.6% | 0.85 | – |
+| night (median of windows) | 19 people | 16.2% | 78.9% | 0.88 | 1.28 [0.76, 2.13] |
+| night, only the 14 people with clean ECG most of the night | 14 | 21.8% | – | 0.77 | 1.31 |
+
+Mean heart rate per window agrees within 0.15 bpm (median), so beats are found correctly; the error
+is in beat *timing*. The beat-to-beat variation of the ECG → wrist pulse delay is 36 ms (median;
+IQR 28–56 ms) in the 14 clean-ECG subjects. Part of that is physiological (pulse transit time
+changes with each breath), but it's far above the 5–15 ms simulated in test B2.
+
+What this means:
+
+- **Wrist HRV runs high.** On average the wrist reads RMSSD about 30% above ECG, because timing
+  noise adds beat-to-beat variation. A typical nightly error is 15–20%, and one person in ten is off
+  by about 80%.
+- **It still ranks people and nights well** (ρ 0.85–0.88). For a personal baseline, which is how the
+  recovery score uses HRV, a consistent overestimate cancels out. Absolute values shouldn't be
+  compared with chest-strap or published norms.
+- **Coverage is good when the band fits:** median 98% of sleep windows per person, but one subject
+  had only 15%, presumably from a loose band or movement.
+- Not tested: the E4's own beat-interval output. DREAMT stores it resampled and forward-filled, so
+  individual beats can't be recovered reliably from it.
+
 ### Resting heart rate
 
 **1. Does staging error matter?** Walch (31 lab nights). Resting heart rate using sleep from
@@ -124,8 +157,9 @@ per person.
 - **The HRV ground truth is 24-hour Holter**, not polysomnography. The "night" is the lowest-heart-
   rate 6 hours, and subjects are older adults in sinus rhythm (54 people). Arrhythmias such as
   atrial fibrillation make RMSSD meaningless.
-- **No real wrist-PPG HRV validation yet.** Test B2 simulates beat-timing jitter. Measuring a real
-  wrist sensor needs a dataset with PPG and ECG together (e.g. DREAMT, once access is granted).
+- **Wrist-PPG HRV is tested on one device** (Empatica E4, 20 sleep-lab patients, above). It reads
+  about 30% high, with 15–20% typical nightly error. Other watches' beat detection differs. Treat
+  wrist HRV as a personal trend, not an absolute number.
 - **Apple Health beat data is parsed best-effort.** Apple publishes no schema for `export.xml`,
   and the reader hasn't yet been checked against a real export. Unparseable readings fall back to
   Apple's own SDNN value, which is reported separately.
