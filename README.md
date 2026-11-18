@@ -8,8 +8,26 @@ sensor data, but each one reinvents sleep staging and recovery scoring with no
 published accuracy. OpenVitals is a shared, device-agnostic library with
 numbers attached.
 
-**Status:** v0.8 – personal-baseline recovery score; overnight resting heart rate and HRV (validated against ECG); `openvitals stage` for your own nights (Apple Health, Gadgetbridge, CSV) with a bundled HR-only model; baselines, whole-night sequence models and ensembles, 5-seed results with subject-bootstrap CIs, motion + HR on both datasets, pooled training on all 253 BIDSleep HR nights + Walch; see [RESULTS.md](RESULTS.md). Not a medical device; for
-wellness and research use only.
+**Status:** v0.8 – `openvitals stage` for your own nights (Apple Health, Gadgetbridge, CSV) with a
+bundled heart-rate-only model; overnight resting heart rate, HRV and a personal-baseline recovery
+score; tested on a held-out cohort (DREAMT) and against ECG. See [RESULTS.md](RESULTS.md). Not a
+medical device; for wellness and research use only.
+
+## Accuracy at a glance
+
+| what | tested on | result |
+|---|---|---|
+| Sleep stages (wake / light / deep / REM) | Walch: 31 healthy adults, Apple Watch, lab PSG, never seen in training | kappa **0.51** [0.47, 0.56] |
+| same, heart rate once a minute | Walch | kappa 0.46 |
+| same, different people and device | DREAMT: 100 sleep-lab patients (most with apnea), Empatica E4 | kappa **0.24** [0.20, 0.27]; wake/sleep 0.35 |
+| Resting heart rate | Walch, BIDSleep | staging errors move it < 1 bpm; night-to-night ICC 0.69 |
+| HRV (RMSSD) from wrist pulse | DREAMT, 20 people vs ECG | nightly error 16% (median), ranks people well (ρ 0.88), but reads ~28% high |
+
+Kappa measures agreement with expert scoring (1 = perfect, 0 = chance); published studies report
+about 0.55–0.65 for commercial watches on their own cohorts. **The model works best on healthy
+adults with Apple Watch-quality heart rate. Accuracy roughly halves for people with sleep disorders
+or other wrist sensors.** Wrist HRV is fine for "compared with my usual", not as an absolute number.
+Details: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md), [`docs/RECOVERY.md`](docs/RECOVERY.md).
 
 ## Stage your own nights
 
@@ -42,6 +60,53 @@ result = Stager().stage(night_from_samples(unix_seconds, bpm))
 print(result.summary); print(result.hypnogram())
 ```
 
+## The model
+
+The bundled stager is an ensemble of **10 small networks: 5 TCNs and 5 bidirectional GRUs**, each
+trained with a different seed on 284 nights (all 253 BIDSleep heart-rate nights + Walch). Their
+softmax outputs are averaged.
+
+```
+heart rate → 6 features per 30 s epoch
+     (HR vs your night average, smoothed HR, HR variability over 2.5 / 5.5 min, change, hours into the night)
+                     │
+       ┌─────────────┴─────────────┐
+   5 × TCN                     5 × GRU
+   dilated convolutions,       reads the whole night
+   sees ±1 h around each       forwards and backwards
+   epoch (~38k params)         (~13k params)
+       └─────────────┬─────────────┘
+          average of 10 probability sets
+                     │
+          wake / light / deep / REM per epoch
+```
+
+- **Why two kinds:** they make different mistakes (TCNs did better with less data, GRUs with more),
+  so averaging cancels some of each. Averaging 5 seeds removes most seed-to-seed variation.
+- **Why heart rate only:** motion added nothing to these whole-night models, and it hurt transfer
+  from home to lab nights. More heart-rate training nights helped far more (+0.05–0.07 kappa).
+- **Training:** Adam, one night per step, class-weighted cross-entropy, early stopping on the kappa
+  of held-out *people*.
+
+### ONNX: one 1 MB file, no PyTorch
+
+The ensemble ships as a single **ONNX** file (`src/openvitals/assets/stager_hr_4class.onnx`).
+ONNX is a standard model format that runs anywhere onnxruntime does: Python, C++, Android, iOS,
+web. Users don't need PyTorch (~1–3 GB), only onnxruntime (~15–50 MB). The graph standardises
+inputs, runs all 10 networks and averages them, so the contract is just:
+
+```python
+import onnxruntime as ort
+from openvitals import features
+X = features.extract(night, "hr").X[None].astype("float32")     # (1, epochs, 6)
+probs = ort.InferenceSession("stager_hr_4class.onnx").run(["probs"], {"features": X})[0]
+```
+
+Class names, feature order, scheme, version and data attribution (ODC-By) are stored in the file's
+metadata. `scripts/validate_release.py` checks that the ONNX file reproduces the PyTorch benchmark
+exactly (kappa 0.514 both ways). To build your own:
+`openvitals export walch=data/walch --model tcn_hr --scheme 4class --out model.onnx`.
+
 ## Benchmark rules
 
 - **Subject-wise splits only.** A person's nights never appear in both train and test.
@@ -61,7 +126,9 @@ print(result.summary); print(result.hypnogram())
 | `walch` | [PhysioNet sleep-accel 1.0.0](https://physionet.org/content/sleep-accel/1.0.0/) | 31 / 31 | Apple Watch accel + PPG HR | PSG | open (2.2 GB; fetched from the AWS Open Data mirror) |
 | `bidsleep` | [PhysioNet bidsleep-dataset 1.0.1](https://physionet.org/content/bidsleep-dataset/) | 47 / 253 | Apple Watch accel + HealthKit HR | Dreem 2 EEG, expert-corrected | open (27.9 GB, ~27 GB of it motion; loads HR-only if `motion.csv` is absent) |
 
-Tested on (not trained on): DREAMT 2.2.0 (restricted, 100 sleep-lab patients, Empatica E4); see RESULTS.md. Planned: MESA/SHHS via NSRR (data request). Model
+| `dreamt` | [PhysioNet DREAMT 2.2.0](https://physionet.org/content/dreamt/2.2.0/) | 100 / 100 | Empatica E4 wrist (HR, BVP, accel) + PSG ECG | PSG | **restricted** (data-use agreement); used only to *test*, never to train a shipped model |
+
+Planned: MESA/SHHS via NSRR (data request). Model
 weights trained on restricted data will not be published unless the data-use
 agreement allows it.
 
@@ -106,8 +173,9 @@ uv run openvitals bench walch=data/walch --models tcn_motion_hr,gru_motion_hr --
 uv run openvitals export walch=data/walch --model tcn_motion_hr --scheme 4class --out tcn.onnx
 ```
 
-`ens_hr` / `ens_motion_hr` average the softmax of a TCN and a GRU trained with the same seed
-(not ONNX-exportable yet).
+`ens_hr` / `ens_motion_hr` average the softmax of a TCN and a GRU trained with the same seed;
+`ens10_hr` is the shipped 5 TCN + 5 GRU ensemble. Ensembles export to one ONNX graph
+(`openvitals export ... --model ens10_hr --jobs 4`).
 
 The ONNX graph takes raw `features.extract` output, shape `(1, epochs, n_features)`,
 with standardisation inside. Feature order and class names are in the model metadata.
@@ -159,7 +227,7 @@ windows, per-night z-scored HR and its rolling SD, hours since start.
 src/openvitals/
   schema.py      Night: motion, hr, per-epoch labels, seconds from epoch 0
   stages.py      canonical codes + 2/3/4-class schemes
-  datasets/      walch, bidsleep loaders (+ npz cache)
+  datasets/      walch, bidsleep, dreamt loaders (+ npz cache)
   features.py    per-epoch features
   models/        baselines
   splits.py      subject k-fold, LOSO, cross-dataset
@@ -170,7 +238,8 @@ src/openvitals/
   featstore.py   per-subject feature files; streaming featurize
   infer.py       Stager: stage unlabelled nights with an exported ONNX model
   adapters.py    CSV, Apple Health and Gadgetbridge readers (HR, HRV, beat intervals); split_nights
-  recovery.py    resting heart rate, beat cleaning, RMSSD, nightly HRV
+  recovery.py    resting heart rate, beat cleaning, RMSSD, nightly HRV, recovery score
+  beats.py       ECG R-peak and wrist PPG beat detection
   assets/        bundled release model (stager_hr_4class.onnx)
 ```
 
